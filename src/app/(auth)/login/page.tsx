@@ -1,24 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useFormState, useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { login } from '@/actions/auth';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+
+const initialState = {
+  message: null,
+  errors: {},
+  success: false,
+};
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" className="w-full" aria-disabled={pending}>
+      {pending ? 'Logging In...' : 'Login'}
+    </Button>
+  );
+}
 
 export default function LoginPage() {
   const router = useRouter();
+  const { toast } = useToast();
+  const [state, formAction] = useFormState(login, initialState);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    // In a real app, you'd handle authentication here
-    // For this scaffold, we'll just redirect to the dashboard
-    router.push('/dashboard');
-  };
+   useEffect(() => {
+    if (state.success) {
+      toast({
+        title: 'Login Successful',
+        description: 'Welcome back!',
+      });
+      router.push('/dashboard');
+    }
+  }, [state.success, router, toast]);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -27,7 +51,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-muted/40 p-4">
       <div className="w-full max-w-md">
-        <form onSubmit={handleSubmit}>
+        <form action={formAction}>
           <Card className="rounded-xl shadow-2xl">
             <CardHeader className="text-center">
               <Link href="/" className="inline-block mx-auto mb-4">
@@ -39,9 +63,16 @@ export default function LoginPage() {
               <CardDescription>Enter your credentials to access your account.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {state.message && !state.success && (
+                <Alert variant="destructive">
+                  <AlertTitle>Login Failed</AlertTitle>
+                  <AlertDescription>{state.message}</AlertDescription>
+                </Alert>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" required />
+                <Input id="email" name="email" type="email" placeholder="m@example.com" required />
+                {state.errors?.email && <p className="text-sm font-medium text-destructive">{state.errors.email[0]}</p>}
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -53,6 +84,7 @@ export default function LoginPage() {
                 <div className="relative">
                   <Input
                     id="password"
+                    name="password"
                     type={showPassword ? 'text' : 'password'}
                     required
                   />
@@ -66,10 +98,9 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
+                 {state.errors?.password && <p className="text-sm font-medium text-destructive">{state.errors.password[0]}</p>}
               </div>
-              <Button type="submit" className="w-full">
-                Login
-              </Button>
+              <SubmitButton />
               <div className="mt-4 text-center text-sm">
                 Don&apos;t have an account?{' '}
                 <Link href="/signup" className="underline font-medium text-primary">

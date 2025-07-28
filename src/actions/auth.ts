@@ -6,6 +6,69 @@ import clientPromise from '@/lib/mongodb';
 import { randomBytes } from 'crypto';
 import { promisify } from 'util';
 
+const loginSchema = z.object({
+  email: z.string().email({ message: 'Please enter a valid email.' }),
+  password: z.string().min(1, { message: 'Password is required.' }),
+  role: z.enum(['member', 'pastor']).optional(),
+});
+
+export async function login(prevState: any, formData: FormData) {
+  const validatedFields = loginSchema.safeParse(
+    Object.fromEntries(formData.entries())
+  );
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+
+  const { email, password, role } = validatedFields.data;
+
+  try {
+    const client = await clientPromise;
+    const db = client.db();
+    const usersCollection = db.collection('users');
+
+    const user = await usersCollection.findOne({ email });
+
+    if (!user) {
+      return { message: 'Invalid credentials provided.' };
+    }
+
+    // If a role is specified during login, check if it matches
+    if (role) {
+      if(user.role !== role) {
+        return { message: 'Login failed. Please check your credentials and try again.' };
+      }
+    } else {
+        // This is for the general member login, ensure they are not a pastor
+        if(user.role === 'pastor') {
+             return { message: 'Login failed. Please check your credentials and try again.' };
+        }
+    }
+
+    const passwordsMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordsMatch) {
+      return { message: 'Invalid credentials provided.' };
+    }
+
+    // In a real app you'd create a session here.
+    // We're returning the user role for redirection purposes.
+    return {
+      success: true,
+      role: user.role,
+    };
+
+  } catch (error) {
+    console.error('Login error:', error);
+    return {
+      message: 'An unexpected error occurred. Please try again.',
+    };
+  }
+}
+
 const signupSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email.' }),
