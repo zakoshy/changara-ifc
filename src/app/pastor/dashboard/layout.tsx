@@ -102,11 +102,9 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
           <SidebarFooter>
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarTrigger asChild>
-                        <button className="flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-2">
-                           <PanelLeft />
-                           <span className="group-data-[collapsible=icon]:hidden">Collapse</span>
-                        </button>
+                    <SidebarTrigger>
+                       <PanelLeft />
+                       <span className="group-data-[collapsible=icon]:hidden">Collapse</span>
                     </SidebarTrigger>
                 </SidebarMenuItem>
             </SidebarMenu>
