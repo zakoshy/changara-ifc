@@ -21,6 +21,7 @@ import type { Event, Teaching, User } from '@/lib/types';
 import { GiveDialog } from './give-dialog';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { ReminderPopover } from './reminder-popover';
 
 
 const TeachingDisplay = ({ teaching }: { teaching: Teaching }) => {
@@ -179,7 +180,8 @@ export function EventDetailsDialog({ event, user, children }: { event: Event, us
                         </div>
                     )}
                 </div>
-                 <DialogFooter>
+                 <DialogFooter className="sm:justify-between gap-2">
+                    <ReminderPopover eventTitle={event.title} />
                     <GiveDialog title={`Contribute to: ${event.title}`} user={user}>
                         <Button>Contribute to Event</Button>
                     </GiveDialog>
