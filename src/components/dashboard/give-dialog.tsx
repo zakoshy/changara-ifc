@@ -49,18 +49,20 @@ export function GiveDialog({ title, children }: { title: string, children: React
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="amount">Amount (Ksh)</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground">Ksh</span>
-              <Input
-                id="amount"
-                type="number"
-                placeholder="1000"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="pl-10"
-              />
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="amount" className="text-right">
+              Amount
+            </Label>
+            <div className="col-span-3 relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">Ksh</span>
+                <Input
+                    id="amount"
+                    type="number"
+                    placeholder="1000"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="pl-10"
+                />
             </div>
           </div>
         </div>
