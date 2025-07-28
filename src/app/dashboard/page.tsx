@@ -1,12 +1,11 @@
-import { getEvents, getTeachings } from '@/actions/events';
+import { getEvents } from '@/actions/events';
 import { getUserById } from '@/actions/users';
 import { FeedCard } from '@/components/dashboard/feed-card';
-import { User, Event, Teaching, FeedItem } from '@/lib/types';
+import { User, Event, FeedItem } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 
 export default async function DashboardPage() {
   const allEvents = await getEvents();
-  const allTeachings = await getTeachings();
   const user = (await getUserById('no-id')) as User; // Cast as User because we know it returns a user or fallback
 
   const today = new Date();
@@ -21,17 +20,9 @@ export default async function DashboardPage() {
         return false;
       }
     })
-    .map((item) => ({ ...item, type: 'event', sortDate: new Date(item.date) }));
+    .map((item) => ({ ...item, type: 'event', sortDate: new Date(item.date) }))
+    .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime()) as FeedItem[];
 
-  const recentTeachings = allTeachings.map((item) => ({
-    ...item,
-    type: 'teaching',
-    sortDate: new Date(item.createdAt),
-  }));
-
-  const combinedFeed = [...upcomingEvents, ...recentTeachings].sort(
-    (a, b) => b.sortDate.getTime() - a.sortDate.getTime()
-  ) as FeedItem[];
 
   return (
     <div className="flex flex-col gap-8 py-6">
@@ -50,19 +41,19 @@ export default async function DashboardPage() {
 
       <div>
         <h2 className="text-2xl font-bold tracking-tight font-headline mb-4">
-          Latest Updates &amp; Events
+          Upcoming Events
         </h2>
-        {combinedFeed.length > 0 ? (
+        {upcomingEvents.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {combinedFeed.map((item) => (
+            {upcomingEvents.map((item) => (
               <FeedCard key={`${item.type}-${item.id}`} item={item} user={user} />
             ))}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center text-center py-12 border-2 border-dashed rounded-lg bg-card">
-            <h2 className="text-xl font-semibold">No Recent Activity</h2>
+            <h2 className="text-xl font-semibold">No Upcoming Events</h2>
             <p className="text-muted-foreground mt-2">
-              There are no upcoming events or recent teachings. Please check back later!
+              There are no upcoming events scheduled. Please check back later!
             </p>
           </div>
         )}

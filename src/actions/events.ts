@@ -67,8 +67,9 @@ export async function createEvent(prevState: any, formData: FormData) {
     const db = client.db();
     
     let teachingId: string | undefined = undefined;
+    const createPromises = [];
 
-    // If teaching data is present, create it first.
+    // If teaching data is present, prepare it for creation.
     if (isTeachingDataPresent) {
         const teachingsCollection = db.collection('teachings');
         let mediaUrl = 'https://placehold.co/600x400.png';
@@ -79,20 +80,22 @@ export async function createEvent(prevState: any, formData: FormData) {
         }
 
         const newTeachingId = uuidv4();
-        await teachingsCollection.insertOne({
+        teachingId = newTeachingId; // Assign for event linking
+
+        const teachingCreationPromise = teachingsCollection.insertOne({
           id: newTeachingId,
           text: teachingText,
           mediaType: teachingMediaType || 'photo',
           mediaUrl,
           createdAt: new Date().toISOString(),
         });
-        teachingId = newTeachingId;
+        createPromises.push(teachingCreationPromise);
     }
     
     // Prepare Event creation if data is present
     if (isEventDataPresent) {
         const eventsCollection = db.collection('events');
-        await eventsCollection.insertOne({
+        const eventCreationPromise = eventsCollection.insertOne({
             title,
             description,
             date,
@@ -101,9 +104,17 @@ export async function createEvent(prevState: any, formData: FormData) {
             imageUrl: 'https://placehold.co/600x400.png', // Placeholder image
             teachingId: teachingId, // Link the teaching if it was created
         });
+         createPromises.push(eventCreationPromise);
+    }
+    
+    // Execute all creation promises concurrently
+    if(createPromises.length > 0) {
+        await Promise.all(createPromises);
     }
 
+
     revalidatePath('/pastor/dashboard');
+    revalidatePath('/dashboard');
     
     let successMessage = '';
     if (isEventDataPresent && isTeachingDataPresent) {
@@ -159,7 +170,7 @@ export async function updateEvent(prevState: any, formData: FormData) {
     updatePromises.push(eventUpdatePromise);
     
     // If there's a linked teaching, update it as well.
-    if (teachingId) {
+    if (teachingId && teachingText) {
         const teachingsCollection = db.collection('teachings');
         const teachingUpdatePromise = teachingsCollection.updateOne(
             { id: teachingId },
@@ -171,6 +182,7 @@ export async function updateEvent(prevState: any, formData: FormData) {
     await Promise.all(updatePromises);
     
     revalidatePath('/pastor/dashboard');
+    revalidatePath('/dashboard');
     return {
       success: true,
       message: 'Event updated successfully!',
@@ -223,6 +235,7 @@ export async function deleteEvent(eventId: string) {
     }
 
     revalidatePath('/pastor/dashboard');
+    revalidatePath('/dashboard');
     return { success: true, message: 'Event deleted successfully.' };
   } catch (error) {
     console.error('Delete event error:', error);
@@ -278,6 +291,10 @@ export async function deleteTeaching(teachingId: string) {
     const db = client.db();
     const teachingsCollection = db.collection('teachings');
 
+    // Also need to remove the teachingId from any event that references it.
+    const eventsCollection = db.collection('events');
+    await eventsCollection.updateMany({ teachingId: teachingId }, { $unset: { teachingId: "" } });
+
     const result = await teachingsCollection.deleteOne({ id: teachingId });
     
     if (result.deletedCount === 0) {
@@ -285,6 +302,7 @@ export async function deleteTeaching(teachingId: string) {
     }
 
     revalidatePath('/pastor/dashboard');
+    revalidatePath('/dashboard');
     return { success: true, message: 'Teaching deleted successfully.' };
   } catch (error) {
     console.error('Delete teaching error:', error);
@@ -300,3 +318,26 @@ export type Teaching = {
   text?: string;
   createdAt: string;
 };
+
+export async function getEventById(eventId: string): Promise<Event | null> {
+    if (!ObjectId.isValid(eventId)) return null;
+    try {
+        const client = await clientPromise;
+        const db = client.db();
+        const eventsCollection = db.collection('events');
+        const event = await eventsCollection.findOne({ _id: new ObjectId(eventId) });
+
+        if (!event) return null;
+
+        return {
+            ...event,
+            _id: undefined,
+            id: (event._id as ObjectId).toString(),
+            imageUrl: event.imageUrl || 'https://placehold.co/600x400.png',
+        } as Event;
+
+    } catch (error) {
+        console.error("Failed to fetch event by ID:", error);
+        return null;
+    }
+}
