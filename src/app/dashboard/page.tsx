@@ -36,13 +36,13 @@ export default async function DashboardPage() {
         {upcomingEvents.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {upcomingEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
+              <EventCard key={event.id} event={event} user={user} />
             ))}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center text-center py-12 border-2 border-dashed rounded-lg bg-card">
               <h2 className="text-xl font-semibold">No Upcoming Events</h2>
-              <p className="text-muted-foreground mt-2">Check back later for more events. The pastor is planning great things!</p>
+              <p className="text-muted-foreground mt-2">There are no upcoming events scheduled. Please check back later!</p>
           </div>
         )}
       </div>

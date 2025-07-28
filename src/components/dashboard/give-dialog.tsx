@@ -16,12 +16,12 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { initiateStkPush } from '@/actions/mpesa';
 import { LoaderCircle } from 'lucide-react';
+import type { User } from '@/lib/types';
 
 
-export function GiveDialog({ title, children }: { title: string, children: React.ReactNode }) {
+export function GiveDialog({ title, user, children }: { title: string, user: User, children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [amount, setAmount] = useState('');
-  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -34,28 +34,28 @@ export function GiveDialog({ title, children }: { title: string, children: React
       });
       return;
     }
-     if (!phone || phone.length < 10) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid Phone Number',
-        description: 'Please enter a valid phone number, e.g., 0712345678.',
-      });
-      return;
+    
+    if (!user.phone) {
+         toast({
+            variant: 'destructive',
+            title: 'Phone Number Missing',
+            description: 'Your phone number is not set in your profile. Please add it to continue.',
+        });
+        return;
     }
     
     setLoading(true);
     
-    const result = await initiateStkPush({amount, phone});
+    const result = await initiateStkPush({amount, phone: user.phone});
 
     setLoading(false);
 
     if (result.success) {
         toast({
             title: 'Request Sent!',
-            description: `An STK push has been sent to ${phone}. Please enter your M-Pesa PIN to complete the transaction.`,
+            description: `An STK push has been sent to ${user.phone}. Please enter your M-Pesa PIN to complete the transaction.`,
         });
         setAmount('');
-        setPhone('');
         setIsOpen(false);
     } else {
         toast({
@@ -73,38 +73,22 @@ export function GiveDialog({ title, children }: { title: string, children: React
         <DialogHeader>
           <DialogTitle className="font-headline">{title}</DialogTitle>
           <DialogDescription>
-            Your faithful giving supports the work of our church. Thank you for your generosity.
+            Your faithful giving supports the work of our church. Your number ({user.phone}) will be used for the M-Pesa transaction.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="phone" className="text-right">
-              Phone
-            </Label>
-            <div className="col-span-3">
-                <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="0712345678"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full"
-                />
-            </div>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="amount" className="text-right">
-              Amount
+          <div className="grid grid-cols-1 items-center gap-4">
+            <Label htmlFor="amount">
+              Amount (Ksh)
             </Label>
             <div className="col-span-3 relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">Ksh</span>
                 <Input
                     id="amount"
                     type="number"
-                    placeholder="1000"
+                    placeholder="Enter the amount you wish to give"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="pl-10"
+                    className="w-full"
                 />
             </div>
           </div>

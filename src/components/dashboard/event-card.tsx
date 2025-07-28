@@ -1,6 +1,6 @@
 'use client';
 
-import type { Event } from '@/lib/types';
+import type { Event, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, MapPin, HandHeart } from 'lucide-react';
@@ -8,7 +8,7 @@ import { GiveDialog } from './give-dialog';
 import { format } from 'date-fns';
 import { ReminderPopover } from './reminder-popover';
 
-export function EventCard({ event }: { event: Event }) {
+export function EventCard({ event, user }: { event: Event, user: User }) {
   const eventDate = new Date(event.date);
 
   return (
@@ -35,7 +35,7 @@ export function EventCard({ event }: { event: Event }) {
       </CardContent>
       <CardFooter className="bg-muted/50 p-4 flex gap-2">
         <ReminderPopover eventTitle={event.title} />
-        <GiveDialog title={`Contribute to: ${event.title}`}>
+        <GiveDialog title={`Contribute to: ${event.title}`} user={user}>
           <Button className="w-full">
             <HandHeart className="mr-2 h-4 w-4" />
             Contribute

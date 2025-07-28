@@ -97,10 +97,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <Link href="/dashboard" className="text-foreground font-semibold transition-colors hover:text-foreground">
                     Events
                 </Link>
-                <GiveDialog title="Give Tithes">
+                <GiveDialog title="Give Tithes" user={user}>
                     <Button variant="ghost" className="text-muted-foreground"><Sparkles className="mr-2 h-4 w-4"/>Tithes</Button>
                 </GiveDialog>
-                <GiveDialog title="Give Offering">
+                <GiveDialog title="Give Offering" user={user}>
                      <Button variant="ghost" className="text-muted-foreground"><HandHeart className="mr-2 h-4 w-4"/>Offerings</Button>
                 </GiveDialog>
             </nav>
