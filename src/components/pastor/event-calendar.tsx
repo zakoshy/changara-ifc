@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { EventForm } from "./event-form";
 import type { Event } from "@/lib/types";
@@ -13,6 +13,27 @@ import {
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { Badge } from "../ui/badge";
+
+// This new component defers date formatting to the client side to avoid hydration errors.
+function EventDateDisplay({ date, time }: { date: string, time: string }) {
+    const [formattedDate, setFormattedDate] = useState('');
+
+    useEffect(() => {
+        // new Date() can cause mismatches between server and client timezones.
+        // Running it in useEffect ensures it only runs on the client after hydration.
+        setFormattedDate(format(new Date(date), "PPP"));
+    }, [date]);
+
+    if (!formattedDate) {
+        // You can return a placeholder/loader here if needed
+        return <p className="text-sm text-muted-foreground h-5"></p>;
+    }
+
+    return (
+        <p className="text-sm text-muted-foreground">{formattedDate} at {time}</p>
+    );
+}
+
 
 export function EventCalendar({ events }: { events: Event[] }) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -50,7 +71,7 @@ export function EventCalendar({ events }: { events: Event[] }) {
             {events.length > 0 ? events.map(event => (
                 <div key={event.id} className="p-4 rounded-md border bg-card/50">
                     <h3 className="font-semibold">{event.title}</h3>
-                    <p className="text-sm text-muted-foreground">{format(new Date(event.date), "PPP")} at {event.time}</p>
+                    <EventDateDisplay date={event.date} time={event.time} />
                     <p className="text-sm mt-2">{event.description}</p>
                 </div>
             )) : <p className="text-sm text-muted-foreground">No upcoming events. Click a date on the calendar to add one.</p>}
