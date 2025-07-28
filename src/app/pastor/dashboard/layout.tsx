@@ -1,3 +1,4 @@
+'use client';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,8 @@ import {
 } from '@/components/ui/sidebar';
 import { Users, User, LogOut, HandHeart, Calendar } from 'lucide-react';
 import { getPastor } from '@/actions/users';
+import { useEffect, useState } from 'react';
+import type { User as UserType } from '@/lib/types';
 
 
 const UserMenu = ({ pastor }: { pastor: { name: string, email: string, imageUrl?: string }}) => (
@@ -70,8 +73,16 @@ const AppLogo = () => (
     </Link>
 );
 
-export default async function PastorDashboardLayout({ children }: { children: React.ReactNode }) {
-  const pastor = await getPastor();
+export default function PastorDashboardLayout({ children }: { children: React.ReactNode }) {
+  const [pastor, setPastor] = useState<UserType | null>(null);
+
+  useEffect(() => {
+    async function fetchPastor() {
+      const pastorData = await getPastor();
+      setPastor(pastorData);
+    }
+    fetchPastor();
+  }, []);
 
   const pastorDetails = pastor ? {
     name: pastor.name,
@@ -119,14 +130,16 @@ export default async function PastorDashboardLayout({ children }: { children: Re
         </Sidebar>
         <SidebarInset>
           <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
-            <SidebarTrigger className="flex" />
+            <SidebarTrigger />
             <div className="w-full flex-1">
               <h1 className="font-semibold text-lg">Welcome, Pastor {pastorDetails.name.split(' ')[0]}</h1>
             </div>
             <UserMenu pastor={pastorDetails} />
           </header>
           <main className="p-4 sm:px-6 sm:py-6 bg-muted/40">
-            {children}
+            <div className="mx-auto max-w-7xl w-full">
+              {children}
+            </div>
           </main>
         </SidebarInset>
       </div>
