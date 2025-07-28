@@ -4,8 +4,23 @@ import { EventCard } from '@/components/dashboard/event-card';
 import { User } from '@/lib/types';
 
 export default async function DashboardPage() {
-  const events = await getEvents();
+  const allEvents = await getEvents();
   const user = await getUserById('no-id') as User; // Cast as User because we know it returns a user or fallback
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to the beginning of the day
+
+  const upcomingEvents = allEvents.filter(event => {
+    // The date format from placeholder data might be different from the DB
+    try {
+        const eventDate = new Date(event.date);
+        return eventDate >= today;
+    } catch (e) {
+        // Handle potential invalid date strings from old data
+        return false;
+    }
+  });
+
 
   return (
     <div className="flex flex-col gap-8 py-6">
@@ -18,9 +33,9 @@ export default async function DashboardPage() {
       
       <div>
         <h2 className="text-2xl font-bold tracking-tight font-headline mb-4">Upcoming Events</h2>
-        {events.length > 0 ? (
+        {upcomingEvents.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {events.map((event) => (
+            {upcomingEvents.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>
