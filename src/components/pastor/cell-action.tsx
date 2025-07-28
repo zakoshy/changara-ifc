@@ -22,6 +22,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../ui/alert-dialog';
+import { deleteUser } from '@/actions/users';
+import { useState, useTransition } from 'react';
+import { LoaderCircle } from 'lucide-react';
 
 interface CellActionProps {
   data: User;
@@ -29,12 +32,23 @@ interface CellActionProps {
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
 
   const onDelete = () => {
-    // This would be a server action in a real app
-    toast({
-      title: 'Member Deleted',
-      description: `${data.name} has been removed from the member list.`,
+    startTransition(async () => {
+      const result = await deleteUser(data.id);
+      if (result.success) {
+        toast({
+          title: 'Member Deleted',
+          description: `${data.name} has been removed from the member list.`,
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: result.message,
+        });
+      }
     });
   };
 
@@ -50,7 +64,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <AlertDialogTrigger asChild>
-            <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive focus:bg-destructive/10"
+              onSelect={(e) => e.preventDefault()}
+              disabled={isPending}
+            >
               <Trash className="mr-2 h-4 w-4" /> Delete Member
             </DropdownMenuItem>
           </AlertDialogTrigger>
@@ -65,11 +83,13 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={onDelete}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            disabled={isPending}
           >
+            {isPending && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>

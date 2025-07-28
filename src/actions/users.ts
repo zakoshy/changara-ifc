@@ -132,3 +132,27 @@ export async function getUserById(userId: string): Promise<User | null> {
     };
   }
 }
+
+export async function deleteUser(userId: string) {
+  try {
+    if (!ObjectId.isValid(userId)) {
+      return { success: false, message: 'Invalid user ID.' };
+    }
+    
+    const client = await clientPromise;
+    const db = client.db();
+    const usersCollection = db.collection('users');
+
+    const result = await usersCollection.deleteOne({ _id: new ObjectId(userId) });
+    
+    if (result.deletedCount === 0) {
+      return { success: false, message: 'Could not find user to delete.' };
+    }
+
+    revalidatePath('/pastor/dashboard');
+    return { success: true, message: 'User deleted successfully.' };
+  } catch (error) {
+    console.error('Delete user error:', error);
+    return { success: false, message: 'An unexpected error occurred.' };
+  }
+}
