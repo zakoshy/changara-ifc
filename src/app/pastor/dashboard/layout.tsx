@@ -97,9 +97,10 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
   };
   
   const getPageTitle = () => {
-    if (pathname.includes('/members')) return 'Member Management';
-    if (pathname.includes('/contributions')) return 'Contributions';
-    if (pathname.includes('/ai-assistant')) return 'AI Assistant';
+    if (pathname === '/pastor/dashboard/members') return 'Member Management';
+    if (pathname === '/pastor/dashboard/contributions') return 'Contributions';
+    if (pathname === '/pastor/dashboard/ai-assistant') return 'AI Assistant';
+    if (pathname === '/pastor/dashboard') return 'Events & Teachings';
     return `Welcome, Pastor ${pastorDetails.name.split(' ')[0]}`;
   }
 
@@ -120,19 +121,19 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/pastor/dashboard" tooltip="Members">
+                <SidebarMenuButton href="/pastor/dashboard/members" tooltip="Members" isActive={pathname === '/pastor/dashboard/members'}>
                   <Users />
                   <span>Members</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/pastor/dashboard" tooltip="Contributions">
+                <SidebarMenuButton href="/pastor/dashboard/contributions" tooltip="Contributions" isActive={pathname === '/pastor/dashboard/contributions'}>
                     <HandHeart />
                     <span>Contributions</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
                 <SidebarMenuItem>
-                <SidebarMenuButton href="/pastor/dashboard" tooltip="AI Assistant">
+                <SidebarMenuButton href="/pastor/dashboard/ai-assistant" tooltip="AI Assistant" isActive={pathname === '/pastor/dashboard/ai-assistant'}>
                     <Sparkles />
                     <span>AI Assistant</span>
                 </SidebarMenuButton>
