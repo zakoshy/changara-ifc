@@ -7,7 +7,7 @@ import { randomBytes } from 'crypto';
 import { promisify } from 'util';
 
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email.' }),
+  identifier: z.string().min(1, { message: 'Please enter your email or name.' }),
   password: z.string().min(1, { message: 'Password is required.' }),
   role: z.enum(['member', 'pastor']).optional(),
 });
@@ -23,14 +23,16 @@ export async function login(prevState: any, formData: FormData) {
     };
   }
 
-  const { email, password, role } = validatedFields.data;
+  const { identifier, password, role } = validatedFields.data;
 
   try {
     const client = await clientPromise;
     const db = client.db();
     const usersCollection = db.collection('users');
 
-    const user = await usersCollection.findOne({ email });
+    const user = await usersCollection.findOne({ 
+      $or: [{ email: identifier }, { name: identifier }] 
+    });
 
     if (!user) {
       return { message: 'Invalid credentials provided.' };

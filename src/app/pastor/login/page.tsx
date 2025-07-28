@@ -71,9 +71,9 @@ export default function PastorLoginPage() {
                 </Alert>
               )}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" placeholder="pastor@example.com" required />
-                {state.errors?.email && <p className="text-sm font-medium text-destructive">{state.errors.email[0]}</p>}
+                <Label htmlFor="identifier">Email or Name</Label>
+                <Input id="identifier" name="identifier" type="text" placeholder="your name or pastor@example.com" required />
+                {state.errors?.identifier && <p className="text-sm font-medium text-destructive">{state.errors.identifier[0]}</p>}
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
