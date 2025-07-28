@@ -15,6 +15,12 @@ const eventSchema = z.object({
   teachingUrl: z.any().optional(),
 });
 
+// Schema for updating an event, which requires an ID
+const eventUpdateSchema = eventSchema.extend({
+    id: z.string().min(1, 'Event ID is required.'),
+});
+
+
 export async function createEvent(prevState: any, formData: FormData) {
   const validatedFields = eventSchema.safeParse(
     Object.fromEntries(formData.entries())
@@ -49,6 +55,48 @@ export async function createEvent(prevState: any, formData: FormData) {
     };
   } catch (error) {
     console.error('Create event error:', error);
+    return {
+      message: 'An unexpected error occurred. Please try again.',
+    };
+  }
+}
+
+export async function updateEvent(prevState: any, formData: FormData) {
+  const validatedFields = eventUpdateSchema.safeParse(
+    Object.fromEntries(formData.entries())
+  );
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Please correct the errors and try again.',
+    };
+  }
+  
+  try {
+    const { id, teachingUrl, ...eventData } = validatedFields.data;
+
+    if (!ObjectId.isValid(id)) {
+      return { message: 'Invalid event ID.' };
+    }
+
+    const client = await clientPromise;
+    const db = client.db();
+    const eventsCollection = db.collection('events');
+
+    await eventsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: eventData }
+    );
+    
+    revalidatePath('/pastor/dashboard');
+    return {
+      success: true,
+      message: 'Event updated successfully!',
+    };
+
+  } catch(error) {
+    console.error('Update event error:', error);
     return {
       message: 'An unexpected error occurred. Please try again.',
     };

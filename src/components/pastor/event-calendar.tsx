@@ -25,7 +25,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "../ui/button";
-import { Trash, LoaderCircle } from "lucide-react";
+import { Trash, LoaderCircle, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { Skeleton } from "../ui/skeleton";
 import { deleteEvent } from "@/actions/events";
@@ -102,6 +102,8 @@ export function EventCalendar({ events }: { events: Event[] }) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+
 
   useEffect(() => {
     // This ensures the calendar only renders on the client, avoiding hydration errors
@@ -120,8 +122,20 @@ export function EventCalendar({ events }: { events: Event[] }) {
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
     setSelectedDate(date);
+    setEditingEvent(null); // Clear any editing state
     setIsFormOpen(true);
   };
+  
+  const handleEditClick = (event: Event) => {
+    setEditingEvent(event);
+    setSelectedDate(new Date(event.date));
+    setIsFormOpen(true);
+  }
+
+  const closeForm = () => {
+    setIsFormOpen(false);
+    setEditingEvent(null);
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -158,25 +172,33 @@ export function EventCalendar({ events }: { events: Event[] }) {
                             <h3 className="font-semibold">{event.title}</h3>
                             <EventDateDisplay date={event.date} time={event.time} />
                         </div>
-                        <DeleteEventButton eventId={event.id} eventTitle={event.title} />
+                         <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleEditClick(event)}>
+                                <Edit className="h-4 w-4" />
+                            </Button>
+                            <DeleteEventButton eventId={event.id} eventTitle={event.title} />
+                        </div>
                     </div>
                     <p className="text-sm mt-2">{event.description}</p>
                 </div>
             )) : <p className="text-sm text-muted-foreground">No upcoming events. Click a date on the calendar to add one.</p>}
         </div>
       </div>
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      <Dialog open={isFormOpen} onOpenChange={closeForm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create New Event</DialogTitle>
+            <DialogTitle>{editingEvent ? 'Edit Event' : 'Create New Event'}</DialogTitle>
             <DialogDescription>
-              Fill out the details for your new event on{" "}
-              {selectedDate ? format(selectedDate, "PPP") : ""}.
+             {editingEvent 
+                ? "Update the details for your event."
+                : `Fill out the details for your new event on ${selectedDate ? format(selectedDate, "PPP") : ""}.`
+             }
             </DialogDescription>
           </DialogHeader>
           <EventForm
             selectedDate={selectedDate}
-            onFinished={() => setIsFormOpen(false)}
+            onFinished={closeForm}
+            event={editingEvent}
           />
         </DialogContent>
       </Dialog>
