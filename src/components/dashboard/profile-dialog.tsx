@@ -106,7 +106,7 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
                 </p>
             </div>
              <Button variant="outline" asChild>
-                <Link href="/forgot-password?token=dummytokentoavoiderror">
+                <Link href="/forgot-password">
                     <KeyRound className="mr-2 h-4 w-4"/>
                     Reset Password
                 </Link>
