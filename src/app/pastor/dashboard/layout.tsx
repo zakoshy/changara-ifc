@@ -23,7 +23,7 @@ import {
   SidebarInset,
   SidebarRail
 } from '@/components/ui/sidebar';
-import { Users, User, LogOut, HandHeart, Calendar, BookOpen } from 'lucide-react';
+import { Users, User, LogOut, HandHeart, Calendar, BookOpen, Sparkles } from 'lucide-react';
 import { getPastor } from '@/actions/users';
 import { useEffect, useState } from 'react';
 import type { User as UserType } from '@/lib/types';
@@ -98,7 +98,6 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
   
   const getPageTitle = () => {
     if (pathname.includes('/members')) return 'Member Management';
-    if (pathname.includes('/teachings')) return 'Teachings';
     if (pathname.includes('/contributions')) return 'Contributions';
     if (pathname.includes('/ai-assistant')) return 'AI Assistant';
     return `Welcome, Pastor ${pastorDetails.name.split(' ')[0]}`;
@@ -121,12 +120,6 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/pastor/dashboard" tooltip="Teachings">
-                  <BookOpen />
-                  <span>Teachings</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
                 <SidebarMenuButton href="/pastor/dashboard" tooltip="Members">
                   <Users />
                   <span>Members</span>
@@ -136,6 +129,12 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
                 <SidebarMenuButton href="/pastor/dashboard" tooltip="Contributions">
                     <HandHeart />
                     <span>Contributions</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+                <SidebarMenuItem>
+                <SidebarMenuButton href="/pastor/dashboard" tooltip="AI Assistant">
+                    <Sparkles />
+                    <span>AI Assistant</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
