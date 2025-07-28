@@ -15,7 +15,7 @@ export async function initiateStkPush(params: { phone: string, amount: string })
   if (!validatedFields.success) {
     return {
       success: false,
-      message: validatedFields.error.flatten().fieldErrors,
+      message: 'Invalid input provided.',
     };
   }
 
@@ -28,11 +28,12 @@ export async function initiateStkPush(params: { phone: string, amount: string })
   const shortCode = process.env.MPESA_BUSINESS_SHORTCODE;
   const passkey = process.env.MPESA_PASSKEY;
 
-  if (!consumerKey || !consumerSecret || !shortCode || !passkey) {
-    console.error('M-Pesa environment variables are not set.');
+  if (!consumerKey || !consumerSecret || !shortCode || !passkey || consumerKey === 'YOUR_CONSUMER_KEY') {
+    console.error('M-Pesa environment variables are not set correctly in the .env file.');
+    // User-friendly message for the frontend
     return {
         success: false,
-        message: 'Server configuration error. Please contact support.',
+        message: 'The payment service is not configured correctly. Please contact support.',
     };
   }
   
@@ -90,6 +91,9 @@ export async function initiateStkPush(params: { phone: string, amount: string })
   console.log(`Simulating STK Push to ${phone} for amount ${amount}`);
   console.log('Using Shortcode:', shortCode);
   
+  // This is where you would handle the callback from M-Pesa to confirm the transaction
+  // and then save the contribution to the database.
+
   return {
     success: true,
   };

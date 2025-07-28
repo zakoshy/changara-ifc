@@ -38,15 +38,13 @@ export function GiveDialog({ title, children }: { title: string, children: React
       toast({
         variant: 'destructive',
         title: 'Invalid Phone Number',
-        description: 'Please enter a valid phone number.',
+        description: 'Please enter a valid phone number, e.g., 0712345678.',
       });
       return;
     }
     
     setLoading(true);
     
-    // In a real app, you would call the M-Pesa API here.
-    // We are simulating this with a server action.
     const result = await initiateStkPush({amount, phone});
 
     setLoading(false);
@@ -63,7 +61,7 @@ export function GiveDialog({ title, children }: { title: string, children: React
         toast({
             variant: 'destructive',
             title: 'Request Failed',
-            description: result.message || 'Could not initiate STK push. Please try again.',
+            description: result.message || 'Could not initiate STK push. Please check the details and try again.',
         });
     }
   };
