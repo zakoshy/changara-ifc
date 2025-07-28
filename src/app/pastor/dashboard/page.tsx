@@ -1,17 +1,20 @@
-import { placeholderUsers, placeholderContributions } from '@/lib/placeholder-data';
-import { columns as memberColumns } from '@/components/pastor/columns';
-import { columns as contributionColumns } from '@/components/pastor/contribution-columns';
 import { DataTable } from '@/components/pastor/data-table';
 import { EventIdeaGenerator } from '@/components/pastor/event-idea-generator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { EventCalendar } from '@/components/pastor/event-calendar';
 import { getEvents } from '@/actions/events';
+import { getUsers } from '@/actions/users';
+import { getContributions } from '@/actions/contributions';
+import { columns as memberColumns } from '@/components/pastor/columns';
+import { columns as contributionColumns } from '@/components/pastor/contribution-columns';
+
 
 export default async function PastorDashboardPage() {
-  // In a real app, fetch from DB
-  const members = [...placeholderUsers].sort((a, b) => a.name.localeCompare(b.name)); 
-  const contributions = placeholderContributions; 
+  const members = await getUsers();
+  const contributions = await getContributions();
   const events = await getEvents();
+  
+  const sortedMembers = [...members].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="py-6">
@@ -30,7 +33,7 @@ export default async function PastorDashboardPage() {
         <TabsContent value="members">
             <h1 className="text-2xl font-bold tracking-tight font-headline">Member Management</h1>
             <p className="text-muted-foreground mb-6">View and manage all registered members.</p>
-            <DataTable columns={memberColumns} data={members} />
+            <DataTable columns={memberColumns} data={sortedMembers} />
         </TabsContent>
 
         <TabsContent value="contributions">

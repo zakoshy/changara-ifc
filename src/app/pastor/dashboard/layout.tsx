@@ -23,19 +23,15 @@ import {
   SidebarRail
 } from '@/components/ui/sidebar';
 import { Users, User, LogOut, HandHeart, Calendar, PanelLeft } from 'lucide-react';
+import { getPastor } from '@/actions/users';
 
-// In a real app, you'd fetch the logged-in user's data from a session
-const pastor = {
-  name: 'John Doe',
-  email: 'pastor.doe@example.com',
-};
 
-const UserMenu = () => (
+const UserMenu = ({ pastor }: { pastor: { name: string, email: string, imageUrl?: string }}) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button variant="ghost" className="relative h-8 w-8 rounded-full">
         <Avatar className="h-8 w-8">
-          <AvatarImage src="https://placehold.co/40x40.png" alt="Pastor" data-ai-hint="pastor portrait"/>
+          <AvatarImage src={pastor.imageUrl} alt="Pastor" data-ai-hint="pastor portrait"/>
           <AvatarFallback>{pastor.name.charAt(0)}</AvatarFallback>
         </Avatar>
       </Button>
@@ -74,7 +70,19 @@ const AppLogo = () => (
     </Link>
 );
 
-export default function PastorDashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function PastorDashboardLayout({ children }: { children: React.ReactNode }) {
+  const pastor = await getPastor();
+
+  const pastorDetails = pastor ? {
+    name: pastor.name,
+    email: pastor.email,
+    imageUrl: pastor.imageUrl
+  } : {
+    name: 'Pastor',
+    email: 'pastor@example.com',
+    imageUrl: 'https://placehold.co/40x40.png'
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen w-full">
@@ -111,11 +119,11 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
         </Sidebar>
         <SidebarInset>
           <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
-            <SidebarTrigger />
+            <SidebarTrigger className="md:flex" />
             <div className="w-full flex-1">
-              <h1 className="font-semibold text-lg">Welcome, Pastor {pastor.name.split(' ')[0]}</h1>
+              <h1 className="font-semibold text-lg">Welcome, Pastor {pastorDetails.name.split(' ')[0]}</h1>
             </div>
-            <UserMenu />
+            <UserMenu pastor={pastorDetails} />
           </header>
           <main className="flex-1 p-4 sm:px-6 sm:py-0 md:gap-8 bg-muted/40">
             {children}
