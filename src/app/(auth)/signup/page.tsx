@@ -43,7 +43,7 @@ export default function SignupPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" type="tel" placeholder="+1 (555) 555-5555" required />
+                <Input id="phone" type="tel" placeholder="+254 712 345678" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
