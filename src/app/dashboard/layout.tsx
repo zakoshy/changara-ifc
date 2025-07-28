@@ -94,13 +94,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </Sidebar>
         <SidebarInset>
           <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
-            <SidebarTrigger className="md:hidden"/>
+            <SidebarTrigger />
             <div className="w-full flex-1">
               {/* Optional: Add search bar here */}
             </div>
             <UserMenu />
           </header>
-          <main className="p-4 sm:px-6 sm:py-0 md:gap-8 bg-muted/40">
+          <main className="p-4 sm:px-6 sm:py-6 bg-muted/40">
             {children}
           </main>
         </SidebarInset>
