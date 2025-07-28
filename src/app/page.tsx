@@ -64,7 +64,7 @@ export default function LandingPage() {
                   <Link href="/signup">Get Started</Link>
                 </Button>
                 <Button size="lg" variant="ghost" asChild>
-                  <Link href="/pastor/dashboard">Pastor's Area <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Link href="/pastor/login">Pastor's Area <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
               </div>
             </div>
