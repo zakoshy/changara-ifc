@@ -53,7 +53,7 @@ export async function getPastor(): Promise<User | null> {
 export async function updateUserProfilePicture(userId: string, imageUrl: string) {
   try {
     if (!ObjectId.isValid(userId)) {
-        return { error: 'Invalid user ID.' };
+        return { error: 'Invalid user ID. Cannot update picture for a fallback user.' };
     }
 
     const client = await clientPromise;
@@ -94,6 +94,7 @@ export async function getUserById(userId: string): Promise<User | null> {
         ...user,
         id: (user._id as ObjectId).toString(),
         _id: undefined,
+        phone: user.phone || 'N/A',
         imageUrl: user.imageUrl || `https://placehold.co/40x40.png?text=${user.name.charAt(0)}`
         } as User;
     }
@@ -103,6 +104,7 @@ export async function getUserById(userId: string): Promise<User | null> {
         id: 'fallback-user-id',
         name: 'Member User',
         email: 'member@example.com',
+        phone: '555-555-5555',
         role: 'member',
         joinedAt: new Date().toISOString(),
         imageUrl: 'https://placehold.co/40x40.png'
@@ -114,6 +116,7 @@ export async function getUserById(userId: string): Promise<User | null> {
         id: 'fallback-user-id',
         name: 'Member User',
         email: 'member@example.com',
+        phone: '555-555-5555',
         role: 'member',
         joinedAt: new Date().toISOString(),
         imageUrl: 'https://placehold.co/40x40.png'

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import Image from 'next/image';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -17,8 +17,22 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { User } from '@/lib/types';
 import { updateUserProfilePicture } from '@/actions/users';
-import { LoaderCircle, Upload } from 'lucide-react';
+import { LoaderCircle, Upload, Mail, User as UserIcon, Phone, KeyRound } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Separator } from '../ui/separator';
+
+function ProfileInfoRow({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
+    return (
+        <div className="flex items-center gap-4">
+            <div className="text-muted-foreground">{icon}</div>
+            <div>
+                <p className="text-sm text-muted-foreground">{label}</p>
+                <p className="font-medium">{value}</p>
+            </div>
+        </div>
+    );
+}
+
 
 export function ProfileDialog({ user, children }: { user: User; children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,7 +70,7 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
         <DialogHeader>
           <DialogTitle className="font-headline">Your Profile</DialogTitle>
           <DialogDescription>
-            Update your profile picture here. Changes will be visible across the app.
+            View your profile information and update your picture.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
@@ -65,26 +79,45 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
                     <AvatarImage src={user.imageUrl} alt={user.name} />
                     <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
+                 <div className="space-y-1 text-center">
+                    <p className="text-xl font-semibold">{user.name}</p>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                 </div>
             </div>
-          <div className="space-y-2">
-            <Label htmlFor="picture">Update Profile Picture</Label>
-            <div className="flex items-center gap-2">
-                 <Input id="picture" type="file" className="text-sm" />
+          
+            <div className="space-y-4">
+                <ProfileInfoRow icon={<UserIcon className="w-5 h-5"/>} label="Full Name" value={user.name} />
+                <ProfileInfoRow icon={<Mail className="w-5 h-5"/>} label="Email Address" value={user.email} />
+                <ProfileInfoRow icon={<Phone className="w-5 h-5"/>} label="Phone Number" value={user.phone || 'Not provided'} />
             </div>
-             <p className="text-xs text-muted-foreground">
-                Note: File upload is a demo. Clicking save will assign a new random avatar.
-            </p>
-          </div>
+
+            <Separator />
+          
+            <div className="space-y-2">
+                <Label htmlFor="picture">Update Profile Picture</Label>
+                <div className="flex items-center gap-2">
+                    <Input id="picture" type="file" className="text-sm" />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                    Note: File upload is a demo. Clicking save will assign a new random avatar.
+                </p>
+            </div>
+             <Button variant="outline" asChild>
+                <Link href="/forgot-password">
+                    <KeyRound className="mr-2"/>
+                    Reset Password
+                </Link>
+            </Button>
         </div>
-        <DialogFooter>
-          <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Close</Button>
           <Button type="button" onClick={handleSave} disabled={isPending}>
             {isPending ? (
                 <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
             ) : (
                 <Upload className="mr-2 h-4 w-4" />
             )}
-            Save
+            Update Picture
           </Button>
         </DialogFooter>
       </DialogContent>
