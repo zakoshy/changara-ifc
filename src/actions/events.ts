@@ -67,6 +67,7 @@ export async function getEvents(): Promise<Event[]> {
       ...event,
       _id: undefined, // remove non-serializable object
       id: (event._id as ObjectId).toString(),
+      imageUrl: event.imageUrl || 'https://placehold.co/600x400.png',
     })) as Event[];
 
   } catch (error) {
