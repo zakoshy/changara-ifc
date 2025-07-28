@@ -5,19 +5,33 @@ import { revalidatePath } from 'next/cache';
 import clientPromise from '@/lib/mongodb';
 import { Event } from '@/lib/types';
 import { ObjectId } from 'mongodb';
+import {v4 as uuidv4} from 'uuid';
+
 
 const eventSchema = z.object({
-  title: z.string().min(1, 'Title is required.'),
-  description: z.string().min(1, 'Description is required.'),
-  date: z.string().min(1, 'Date is required.'),
-  time: z.string().min(1, 'Time is required.'),
-  location: z.string().min(1, 'Location is required.'),
-  teachingUrl: z.any().optional(),
+  // Event fields (optional)
+  title: z.string().optional(),
+  description: z.string().optional(),
+  date: z.string().optional(),
+  time: z.string().optional(),
+  location: z.string().optional(),
+  
+  // Teaching fields (optional)
+  teachingText: z.string().optional(),
+  teachingMediaType: z.enum(['photo', 'video', 'audio']).optional(),
+  teachingMediaUrl: z.any().optional(), // For file upload placeholder
 });
 
+
 // Schema for updating an event, which requires an ID
-const eventUpdateSchema = eventSchema.extend({
+const eventUpdateSchema = z.object({
     id: z.string().min(1, 'Event ID is required.'),
+    title: z.string().min(1, 'Title is required.'),
+    description: z.string().min(1, 'Description is required.'),
+    date: z.string().min(1, 'Date is required.'),
+    time: z.string().min(1, 'Time is required.'),
+    location: z.string().min(1, 'Location is required.'),
+    teachingUrl: z.any().optional(),
 });
 
 
@@ -33,28 +47,76 @@ export async function createEvent(prevState: any, formData: FormData) {
     };
   }
 
+  const { title, description, date, time, location, teachingText, teachingMediaType } = validatedFields.data;
+  
+  const isEventDataPresent = title && description && date && time && location;
+  const isTeachingDataPresent = teachingText || teachingMediaType;
+
+  if (!isEventDataPresent && !isTeachingDataPresent) {
+      return {
+          message: 'Please fill out either the event details or the teaching details.',
+      };
+  }
+
+
   try {
     const client = await clientPromise;
     const db = client.db();
-    const eventsCollection = db.collection('events');
     
-    // TODO: Handle actual file upload for teaching material
-    // For now, we are just saving the URL if provided
-    const { teachingUrl, ...eventData } = validatedFields.data;
-    
-    await eventsCollection.insertOne({
-      ...eventData,
-      teachingUrl: teachingUrl ? '/placeholder.pdf' : undefined, // Placeholder for file path
-      imageUrl: 'https://placehold.co/600x400.png' // Placeholder image
-    });
+    let eventCreated = false;
+    let teachingCreated = false;
+
+    // Create Event if data is present
+    if (isEventDataPresent) {
+        const eventsCollection = db.collection('events');
+        await eventsCollection.insertOne({
+            title,
+            description,
+            date,
+            time,
+            location,
+            imageUrl: 'https://placehold.co/600x400.png' // Placeholder image
+        });
+        eventCreated = true;
+    }
+
+    // Create Teaching if data is present
+    if (isTeachingDataPresent) {
+        const teachingsCollection = db.collection('teachings');
+        let mediaUrl = 'https://placehold.co/600x400.png';
+        if (teachingMediaType === 'video') {
+            mediaUrl = 'https://placehold.co/600x400.png/000000/FFFFFF?text=Video';
+        } else if (teachingMediaType === 'audio') {
+            mediaUrl = 'https://placehold.co/600x400.png/E8E8E8/000000?text=Audio';
+        }
+
+        await teachingsCollection.insertOne({
+          id: uuidv4(),
+          text: teachingText,
+          mediaType: teachingMediaType || 'photo',
+          mediaUrl,
+          createdAt: new Date().toISOString(),
+        });
+        teachingCreated = true;
+    }
 
     revalidatePath('/pastor/dashboard');
+    
+    let successMessage = '';
+    if (eventCreated && teachingCreated) {
+        successMessage = 'Event and Teaching created successfully!';
+    } else if (eventCreated) {
+        successMessage = 'Event created successfully!';
+    } else if (teachingCreated) {
+        successMessage = 'Teaching created successfully!';
+    }
+
     return {
       success: true,
-      message: 'Event created successfully!',
+      message: successMessage,
     };
   } catch (error) {
-    console.error('Create event error:', error);
+    console.error('Create error:', error);
     return {
       message: 'An unexpected error occurred. Please try again.',
     };
@@ -147,3 +209,51 @@ export async function deleteEvent(eventId: string) {
     return { success: false, message: 'An unexpected error occurred.' };
   }
 }
+
+export async function getTeachings(): Promise<Teaching[]> {
+  try {
+    const client = await clientPromise;
+    const db = client.db();
+    const teachingsCollection = db.collection('teachings');
+    const teachings = await teachingsCollection.find({}).sort({ createdAt: -1 }).toArray();
+
+    return teachings.map(teaching => ({
+      ...teaching,
+      _id: undefined, // remove non-serializable object
+      id: (teaching.id as string),
+    })) as Teaching[];
+
+  } catch (error) {
+    console.error("Failed to fetch teachings:", error);
+    return [];
+  }
+}
+
+export async function deleteTeaching(teachingId: string) {
+  try {
+    const client = await clientPromise;
+    const db = client.db();
+    const teachingsCollection = db.collection('teachings');
+
+    const result = await teachingsCollection.deleteOne({ id: teachingId });
+    
+    if (result.deletedCount === 0) {
+      return { success: false, message: 'Could not find teaching to delete.' };
+    }
+
+    revalidatePath('/pastor/dashboard');
+    return { success: true, message: 'Teaching deleted successfully.' };
+  } catch (error) {
+    console.error('Delete teaching error:', error);
+    return { success: false, message: 'An unexpected error occurred.' };
+  }
+}
+
+export type Teaching = {
+  _id?: ObjectId;
+  id: string;
+  mediaType: 'photo' | 'video' | 'audio';
+  mediaUrl: string;
+  text?: string;
+  createdAt: string;
+};

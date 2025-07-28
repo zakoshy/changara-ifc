@@ -1,8 +1,7 @@
 import { EventCalendar } from '@/components/pastor/event-calendar';
-import { getEvents } from '@/actions/events';
-import { getTeachings } from '@/actions/teachings';
-import { TeachingsManager } from '@/components/pastor/teachings-manager';
+import { getEvents, getTeachings, deleteTeaching } from '@/actions/events';
 import { Separator } from '@/components/ui/separator';
+import { TeachingsDisplay } from '@/components/pastor/teachings-display';
 
 export default async function PastorDashboardPage() {
   const allEvents = await getEvents();
@@ -24,7 +23,7 @@ export default async function PastorDashboardPage() {
     <div className="py-6 space-y-8">
       <EventCalendar events={upcomingEvents} />
       <Separator />
-      <TeachingsManager teachings={allTeachings} />
+      <TeachingsDisplay teachings={allTeachings} deleteTeachingAction={deleteTeaching} />
     </div>
   );
 }
