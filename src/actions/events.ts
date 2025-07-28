@@ -51,10 +51,10 @@ export async function createEvent(prevState: any, formData: FormData) {
     };
   }
 
-  const { title, description, date, time, location, teachingText, teachingMediaType } = validatedFields.data;
+  const { title, description, date, time, location, teachingText, teachingMediaType, teachingMediaUrl } = validatedFields.data;
   
   const isEventDataPresent = title && description && date && time && location;
-  const isTeachingDataPresent = teachingText || teachingMediaType;
+  const isTeachingDataPresent = teachingText || teachingMediaUrl;
 
   if (!isEventDataPresent && !isTeachingDataPresent) {
       return {
@@ -72,11 +72,15 @@ export async function createEvent(prevState: any, formData: FormData) {
     // If teaching data is present, prepare it for creation.
     if (isTeachingDataPresent) {
         const teachingsCollection = db.collection('teachings');
-        let mediaUrl = 'https://placehold.co/600x400.png';
-        if (teachingMediaType === 'video') {
-            mediaUrl = 'https://placehold.co/600x400.png/000000/FFFFFF?text=Video';
-        } else if (teachingMediaType === 'audio') {
-            mediaUrl = 'https://placehold.co/600x400.png/E8E8E8/000000?text=Audio';
+        
+        // Use the uploaded media URL if available, otherwise a placeholder
+        let mediaUrl = teachingMediaUrl || 'https://placehold.co/600x400.png';
+        if (!teachingMediaUrl) {
+            if (teachingMediaType === 'video') {
+                mediaUrl = 'https://placehold.co/600x400.png/000000/FFFFFF?text=Video';
+            } else if (teachingMediaType === 'audio') {
+                mediaUrl = 'https://placehold.co/600x400.png/E8E8E8/000000?text=Audio';
+            }
         }
 
         const newTeachingId = uuidv4();

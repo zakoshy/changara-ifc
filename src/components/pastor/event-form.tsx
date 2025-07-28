@@ -151,10 +151,13 @@ export function EventForm({
             <CardTitle className="text-lg">Create or Edit a Teaching</CardTitle>
             <CardDescription>This can be linked to the event or stand alone. In edit mode, only text can be changed.</CardDescription>
           </CardHeader>
+          
           <input type="hidden" name="teachingMediaType" value={teachingMediaType} />
+          {mediaPreview && <input type="hidden" name="teachingMediaUrl" value={mediaPreview} />}
+
           <Input 
-            id="teachingMediaUrl" 
-            name="teachingMediaUrl" 
+            id="teachingMediaFileInput" 
+            name="teachingMediaFileInput" 
             type="file" 
             ref={fileInputRef} 
             className="hidden"
