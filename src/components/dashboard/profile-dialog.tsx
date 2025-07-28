@@ -53,6 +53,7 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
           description: result.message,
         });
         setIsOpen(false);
+        // We might need to trigger a refresh of the user data here in a real app
       } else {
         toast({
           variant: 'destructive',
@@ -75,7 +76,7 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
         </DialogHeader>
         <div className="grid gap-6 py-4">
             <div className="flex flex-col items-center gap-4">
-                <Avatar className="h-32 w-32">
+                <Avatar className="h-32 w-32 border-2 border-primary/10">
                     <AvatarImage src={user.imageUrl} alt={user.name} />
                     <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
@@ -99,12 +100,12 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
                     <Input id="picture" type="file" className="text-sm" />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                    Note: File upload is a demo. Clicking save will assign a new random avatar.
+                    Note: File upload is for demonstration. Clicking update will assign a new random avatar.
                 </p>
             </div>
              <Button variant="outline" asChild>
-                <Link href="/forgot-password">
-                    <KeyRound className="mr-2"/>
+                <Link href="/reset-password">
+                    <KeyRound className="mr-2 h-4 w-4"/>
                     Reset Password
                 </Link>
             </Button>

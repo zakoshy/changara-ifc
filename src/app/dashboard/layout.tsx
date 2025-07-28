@@ -69,8 +69,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [user, setUser] = useState<UserType | null>(null);
 
   useEffect(() => {
-    // In a real app, you would get the current user from a session.
-    // For this demo, we'll fetch a user from the DB, with a fallback.
     async function fetchUser() {
       const userData = await getUserById('mock-user-id'); // ID is unused in the mock
       setUser(userData);

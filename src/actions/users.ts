@@ -80,34 +80,35 @@ export async function updateUserProfilePicture(userId: string, imageUrl: string)
 }
 
 export async function getUserById(userId: string): Promise<User | null> {
-  // This is a mock function. In a real app, you'd have session management
-  // to get the currently logged-in user. We'll find the first 'member' user.
+  // In a real app, you'd have session management to get the currently logged-in user.
+  // For this demo, we'll find the first 'member' user.
   try {
     const client = await clientPromise;
     const db = client.db();
     const usersCollection = db.collection('users');
     
+    // In a real app, you'd use the userId passed in. For now, we get the first member.
     const user = await usersCollection.findOne({ role: 'member' });
 
     if (user) {
         return {
         ...user,
         id: (user._id as ObjectId).toString(),
-        _id: undefined,
+        _id: undefined, // remove non-serializable object
         phone: user.phone || 'N/A',
         imageUrl: user.imageUrl || `https://placehold.co/40x40.png?text=${user.name.charAt(0)}`
         } as User;
     }
 
-    // Fallback for when no member user is in the DB
+    // Fallback for when no member user is in the DB, to prevent the app from crashing.
     return {
-        id: 'fallback-user-id',
+        id: 'fallback-user-id', // This ID is not a valid ObjectId, which is handled.
         name: 'Member User',
         email: 'member@example.com',
         phone: '555-555-5555',
         role: 'member',
         joinedAt: new Date().toISOString(),
-        imageUrl: 'https://placehold.co/40x40.png'
+        imageUrl: 'https://placehold.co/128x128.png'
     };
   } catch (error) {
     console.error("Failed to fetch user:", error);
@@ -119,7 +120,7 @@ export async function getUserById(userId: string): Promise<User | null> {
         phone: '555-555-5555',
         role: 'member',
         joinedAt: new Date().toISOString(),
-        imageUrl: 'https://placehold.co/40x40.png'
+        imageUrl: 'https://placehold.co/128x128.png'
     };
   }
 }
