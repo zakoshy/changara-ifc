@@ -73,7 +73,7 @@ const TeachingDisplay = ({ teaching }: { teaching: Teaching }) => {
             </div>
             
             <div className="aspect-video bg-muted rounded-md flex items-center justify-center overflow-hidden">
-                {teaching.mediaType === 'photo' && <Image src={teaching.mediaUrl} alt={teaching.text || 'Teaching media'} width={600} height={400} className="object-cover" />}
+                {teaching.mediaType === 'photo' && <Image src={teaching.mediaUrl} alt={teaching.text || 'Teaching media'} width={600} height={400} className="object-cover" data-ai-hint="church teaching" />}
                 {teaching.mediaType === 'video' && <video src={teaching.mediaUrl} controls className="w-full h-full">Your browser does not support the video tag.</video>}
                 {teaching.mediaType === 'audio' && <div className="p-4 w-full"><audio src={teaching.mediaUrl} controls className="w-full">Your browser does not support the audio element.</audio></div>}
             </div>
