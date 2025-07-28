@@ -1,4 +1,4 @@
-import type { User, Event } from './types';
+import type { User, Event, Contribution } from './types';
 
 export const placeholderUsers: User[] = [
   { id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'member', joinedAt: '2023-01-15' },
@@ -24,7 +24,7 @@ export const placeholderEvents: Event[] = [
   {
     id: '2',
     title: 'Youth Group Night',
-    date: 'Friday, July 26, 2024',
+    date: '2024-07-26T10:00:00.000Z',
     time: '7:00 PM',
     location: 'Youth Hall',
     description: 'A fun and engaging night for teenagers! We\'ll have games, worship, a relevant message, and plenty of time to hang out and build friendships.',
@@ -33,37 +33,17 @@ export const placeholderEvents: Event[] = [
   {
     id: '3',
     title: 'Community Outreach Day',
-    date: 'Saturday, August 3, 2024',
+    date: '2024-08-03T10:00:00.000Z',
     time: '9:00 AM - 2:00 PM',
     location: 'Local Park',
     description: 'Let\'s be the hands and feet of Jesus in our community. We will be helping with park cleanup and distributing care packages. Sign up to volunteer!',
     imageUrl: 'https://placehold.co/600x400.png',
   },
-  {
-    id: '4',
-    title: 'Women\'s Ministry Breakfast',
-    date: 'Saturday, August 10, 2024',
-    time: '9:30 AM',
-    location: 'Fellowship Hall',
-    description: 'A morning of fellowship, encouragement, and delicious food for all the ladies of our church. Come and be blessed!',
-    imageUrl: 'https://placehold.co/600x400.png',
-  },
-  {
-    id: '5',
-    title: 'Men\'s Prayer Meeting',
-    date: 'Every First Saturday',
-    time: '7:00 AM',
-    location: 'Prayer Room',
-    description: 'An early morning gathering for men to seek God\'s face, intercede for our families and church, and build each other up in faith.',
-    imageUrl: 'https://placehold.co/600x400.png',
-  },
-  {
-    id: '6',
-    title: 'Annual Church Picnic',
-    date: 'Sunday, September 1, 2024',
-    time: '12:30 PM',
-    location: 'Riverside Park',
-    description: 'Our favorite annual tradition! Join us after the service for food, fun, games, and fellowship at the park. Bring a dish to share!',
-    imageUrl: 'https://placehold.co/600x400.png',
-  },
+];
+
+export const placeholderContributions: Contribution[] = [
+    { id: '1', mpesaRef: 'SGH45KL8OP', userName: 'Alice Johnson', userEmail: 'alice@example.com', date: '2024-07-21' },
+    { id: '2', mpesaRef: 'SGH56MN9PQ', userName: 'Bob Williams', userEmail: 'bob@example.com', date: '2024-07-21' },
+    { id: '3', mpesaRef: 'SGI78HJ2RS', userName: 'Charlie Brown', userEmail: 'charlie@example.com', date: '2024-07-20' },
+    { id: '4', mpesaRef: 'SGJ90BC3TU', userName: 'Alice Johnson', userEmail: 'alice@example.com', date: '2024-07-14' },
 ];

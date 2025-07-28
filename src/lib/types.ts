@@ -1,17 +1,33 @@
+import { ObjectId } from "mongodb";
+
 export type User = {
-  id: string;
+  _id?: ObjectId;
+  id?: string; // from placeholder
   name: string;
   email: string;
   role: 'member' | 'pastor';
   joinedAt: string;
+  password?: string;
+  resetToken?: string;
+  resetTokenExpiry?: Date;
 };
 
 export type Event = {
-  id: string;
+  _id?: ObjectId;
+  id?: string; // from placeholder
   title: string;
   date: string;
   time: string;
   location: string;
   description: string;
   imageUrl: string;
+  teachingUrl?: string;
+};
+
+export type Contribution = {
+    id: string;
+    mpesaRef: string;
+    userName: string;
+    userEmail: string;
+    date: string;
 };

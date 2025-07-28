@@ -1,0 +1,76 @@
+"use client";
+
+import { useState } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import { EventForm } from "./event-form";
+import type { Event } from "@/lib/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { format } from "date-fns";
+import { Badge } from "../ui/badge";
+
+export function EventCalendar({ events }: { events: Event[] }) {
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
+  const eventDates = events.map(event => new Date(event.date));
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (!date) return;
+    setSelectedDate(date);
+    setIsFormOpen(true);
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="md:col-span-2">
+        <div className="rounded-md border bg-card p-4">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDateSelect}
+              className="p-0"
+              modifiers={{
+                events: eventDates,
+              }}
+              modifiersClassNames={{
+                events: "bg-primary/20 rounded-full",
+              }}
+            />
+        </div>
+      </div>
+      <div>
+        <h2 className="font-headline text-lg mb-4">Upcoming Events</h2>
+        <div className="space-y-4">
+            {events.length > 0 ? events.map(event => (
+                <div key={event.id} className="p-4 rounded-md border bg-card/50">
+                    <h3 className="font-semibold">{event.title}</h3>
+                    <p className="text-sm text-muted-foreground">{format(new Date(event.date), "PPP")} at {event.time}</p>
+                    <p className="text-sm mt-2">{event.description}</p>
+                </div>
+            )) : <p className="text-sm text-muted-foreground">No upcoming events. Click a date on the calendar to add one.</p>}
+        </div>
+      </div>
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Event</DialogTitle>
+            <DialogDescription>
+              Fill out the details for your new event on{" "}
+              {selectedDate ? format(selectedDate, "PPP") : ""}.
+            </DialogDescription>
+          </DialogHeader>
+          <EventForm
+            selectedDate={selectedDate}
+            onFinished={() => setIsFormOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

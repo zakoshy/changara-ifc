@@ -21,7 +21,7 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { Users, User, LogOut } from 'lucide-react';
+import { Users, User, LogOut, HandHeart, Calendar } from 'lucide-react';
 
 const UserMenu = () => (
   <DropdownMenu>
@@ -75,9 +75,21 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
           <SidebarContent className="p-2">
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/pastor/dashboard" tooltip="Members" isActive>
+                <SidebarMenuButton href="/pastor/dashboard" tooltip="Events" isActive>
+                  <Calendar />
+                  <span>Events</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton href="/pastor/dashboard" tooltip="Members">
                   <Users />
                   <span>Members</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton href="/pastor/dashboard" tooltip="Contributions">
+                    <HandHeart />
+                    <span>Contributions</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
