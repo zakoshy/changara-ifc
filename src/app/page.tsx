@@ -54,7 +54,7 @@ export default function LandingPage() {
           <div className="container relative text-center">
             <div className="mx-auto max-w-3xl">
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl font-headline">
-                Welcome to Changara Connect
+                Welcome to IFC changara
               </h1>
               <p className="mt-6 text-lg leading-8 text-muted-foreground">
                 Stay connected with our church community. Access event schedules, give online, and receive important updates, all in one place.
