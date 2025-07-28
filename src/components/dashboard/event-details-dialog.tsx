@@ -19,35 +19,52 @@ import { format } from 'date-fns';
 import { getTeachingById } from '@/actions/events';
 import type { Event, Teaching, User } from '@/lib/types';
 import { GiveDialog } from './give-dialog';
-
-
-async function downloadMedia(mediaUrl: string, title: string) {
-    try {
-        const response = await fetch(mediaUrl);
-        if (!response.ok) throw new Error('Network response was not ok.');
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        // Extract extension and construct filename
-        const extension = mediaUrl.split('.').pop()?.split('?')[0] || 'mp4';
-        a.download = `${title.replace(/ /g, '_')}.${extension}`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-    } catch (error) {
-        console.error('Download failed:', error);
-        // Fallback for simple cases or CORS issues
-        window.open(mediaUrl, '_blank');
-    }
-}
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 
 const TeachingDisplay = ({ teaching }: { teaching: Teaching }) => {
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [isDownloaded, setIsDownloaded] = useState(false);
+    const { toast } = useToast();
 
-    const handleDownload = () => {
-        downloadMedia(teaching.mediaUrl, teaching.text || "teaching_media");
+    const handleDownload = async () => {
+        setIsDownloading(true);
+        try {
+            // Simulate network delay for fetching
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            const response = await fetch(teaching.mediaUrl);
+            if (!response.ok) throw new Error('Network response was not ok.');
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const extension = teaching.mediaUrl.split('.').pop()?.split('?')[0] || 'mp4';
+            a.download = `${(teaching.text || "teaching_media").replace(/ /g, '_')}.${extension}`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            
+            toast({
+                title: "Download Started",
+                description: "Your file is downloading.",
+            });
+            setIsDownloaded(true);
+
+        } catch (error) {
+            console.error('Download failed:', error);
+             toast({
+                variant: "destructive",
+                title: "Download Failed",
+                description: "Could not download the file. Please try again.",
+            });
+            // Fallback for simple cases or CORS issues
+            window.open(teaching.mediaUrl, '_blank');
+        } finally {
+            setIsDownloading(false);
+        }
     }
 
     const renderTeachingIcon = (mediaType: 'photo' | 'video' | 'audio') => {
@@ -61,21 +78,38 @@ const TeachingDisplay = ({ teaching }: { teaching: Teaching }) => {
     return (
         <div className="space-y-4">
              <Separator />
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    {renderTeachingIcon(teaching.mediaType)}
-                    <h3 className="text-lg font-semibold">Sermon & Notes</h3>
-                </div>
-                 <Button variant="outline" size="sm" onClick={handleDownload}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Download
-                </Button>
+            <div className="flex items-center gap-2">
+                {renderTeachingIcon(teaching.mediaType)}
+                <h3 className="text-lg font-semibold">Sermon & Notes</h3>
             </div>
             
-            <div className="aspect-video bg-muted rounded-md flex items-center justify-center overflow-hidden">
-                {teaching.mediaType === 'photo' && <Image src={teaching.mediaUrl} alt={teaching.text || 'Teaching media'} width={600} height={400} className="object-cover" data-ai-hint="church teaching" />}
-                {teaching.mediaType === 'video' && <video src={teaching.mediaUrl} controls className="w-full h-full">Your browser does not support the video tag.</video>}
-                {teaching.mediaType === 'audio' && <div className="p-4 w-full"><audio src={teaching.mediaUrl} controls className="w-full">Your browser does not support the audio element.</audio></div>}
+            <div className="relative aspect-video bg-muted rounded-md flex items-center justify-center overflow-hidden">
+                <div className={cn(
+                    "w-full h-full transition-all duration-500",
+                    !isDownloaded && "blur-md scale-110"
+                )}>
+                    {teaching.mediaType === 'photo' && <Image src={teaching.mediaUrl} alt={teaching.text || 'Teaching media'} width={600} height={400} className="object-cover w-full h-full" data-ai-hint="church teaching" />}
+                    {teaching.mediaType === 'video' && <video src={teaching.mediaUrl} controls={isDownloaded} className="w-full h-full">Your browser does not support the video tag.</video>}
+                    {teaching.mediaType === 'audio' && <div className="p-4 w-full h-full flex items-center justify-center"><audio src={teaching.mediaUrl} controls className="w-full">Your browser does not support the audio element.</audio></div>}
+                </div>
+
+                {!isDownloaded && (
+                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                        <Button
+                            variant="secondary"
+                            size="icon"
+                            className="h-14 w-14 rounded-full shadow-2xl"
+                            onClick={handleDownload}
+                            disabled={isDownloading}
+                        >
+                            {isDownloading ? (
+                                <LoaderCircle className="h-6 w-6 animate-spin" />
+                            ) : (
+                                <Download className="h-6 w-6" />
+                            )}
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {teaching.text && <p className="text-sm text-muted-foreground">{teaching.text}</p>}
@@ -101,6 +135,13 @@ export function EventDetailsDialog({ event, user, children }: { event: Event, us
                 .finally(() => setIsLoading(false));
         }
     }, [isOpen, event.teachingId, teaching]);
+
+    // Reset teaching state when dialog closes
+    useEffect(() => {
+        if (!isOpen) {
+            setTeaching(null);
+        }
+    }, [isOpen])
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
