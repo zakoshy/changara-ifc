@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useActionState, useEffect, useState } from 'react';
@@ -12,16 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { LoaderCircle, ImageIcon, Video, Mic } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Event } from '@/lib/types';
-import { Separator } from '../ui/separator';
 import { Card, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from '@/components/ui/dialog';
 
 const initialState = {
   message: null,
@@ -113,16 +105,6 @@ export function EventForm({
         </div>
       </div>
       
-      <div className="relative">
-          <Separator />
-          <div className="absolute inset-0 flex items-center" aria-hidden="true">
-              <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center">
-              <span className="bg-background px-2 text-sm text-muted-foreground">OR</span>
-          </div>
-      </div>
-
       {/* --- TEACHING FORM --- */}
        <div className="space-y-4 p-4 border rounded-lg">
           <CardHeader className="p-0">
