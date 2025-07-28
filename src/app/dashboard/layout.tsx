@@ -9,19 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-  SidebarTrigger,
-  SidebarInset,
-} from '@/components/ui/sidebar';
-import { Calendar, HandHeart, User, LogOut } from 'lucide-react';
+import { Calendar, HandHeart, User, LogOut, Sparkles } from 'lucide-react';
+import { GiveDialog } from '@/components/dashboard/give-dialog';
 
 const UserMenu = () => (
   <DropdownMenu>
@@ -58,7 +47,10 @@ const UserMenu = () => (
 
 const AppLogo = () => (
     <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold" prefetch={false}>
-      <span className="font-headline text-primary-foreground group-data-[collapsible=icon]:hidden">
+       <div className="bg-primary text-primary-foreground p-2 rounded-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.5a.5.5 0 0 0-1 0V5h-2a.5.5 0 0 0 0 1h2v2H9a.5.5 0 0 0 0 1h2v2H9a.5.5 0 0 0 0 1h2v2.5a.5.5 0 0 0 1 0V13h2a.5.5 0 0 0 0-1h-2v-2h2a.5.5 0 0 0 0-1h-2V6h2a.5.5 0 0 0 0-1h-2V2.5zM2.75 7.063C2.22 7.563 2 8.24 2 9v1a1 1 0 0 0 1 1h2v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V10h2a1 1 0 0 0 1-1V9c0-.76-.22-1.437-.75-1.937L12.5 2.023a.5.5 0 0 0-.5 0l-9.25 5.04zM4.688 7.5H19.31L12 3.844 4.688 7.5z"/></svg>
+      </div>
+      <span className="font-headline text-primary">
         IFC Changara
       </span>
     </Link>
@@ -66,45 +58,29 @@ const AppLogo = () => (
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen w-full">
-        <Sidebar className="border-r bg-primary text-primary-foreground" collapsible="icon">
-          <SidebarHeader>
-              <AppLogo />
-          </SidebarHeader>
-          <SidebarContent className="p-2">
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" tooltip="Events" isActive>
-                  <Calendar />
-                  <span>Events</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" tooltip="Giving">
-                    <HandHeart />
-                    <span>Giving</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarContent>
-          <SidebarFooter>
-            {/* Can add items here later */}
-          </SidebarFooter>
-        </Sidebar>
-        <SidebarInset>
-          <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
-            <SidebarTrigger />
-            <div className="w-full flex-1">
-              {/* Optional: Add search bar here */}
+      <div className="min-h-screen w-full flex flex-col">
+          <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+            <AppLogo />
+            <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+                <Link href="/dashboard" className="text-muted-foreground transition-colors hover:text-foreground">
+                    Events
+                </Link>
+                <GiveDialog title="Give Tithes">
+                    <Button variant="ghost" className="text-muted-foreground"><Sparkles className="mr-2 h-4 w-4"/>Tithes</Button>
+                </GiveDialog>
+                <GiveDialog title="Give Offering">
+                     <Button variant="ghost" className="text-muted-foreground"><HandHeart className="mr-2 h-4 w-4"/>Offerings</Button>
+                </GiveDialog>
+            </nav>
+            <div className="flex w-full items-center justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4">
+                <UserMenu />
             </div>
-            <UserMenu />
           </header>
-          <main className="p-4 sm:px-6 sm:py-6 bg-muted/40">
-            {children}
+          <main className="p-4 sm:px-6 sm:py-6 bg-muted/40 flex-1">
+            <div className="mx-auto max-w-7xl w-full">
+                {children}
+            </div>
           </main>
-        </SidebarInset>
       </div>
-    </SidebarProvider>
   );
 }
