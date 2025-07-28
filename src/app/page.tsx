@@ -71,7 +71,7 @@ export default function LandingPage() {
             <div className="mt-16 flow-root sm:mt-24">
               <div className="-m-2 rounded-xl bg-muted/20 p-2 ring-1 ring-inset ring-primary/10 lg:-m-4 lg:rounded-2xl lg:p-4">
                 <Image
-                  src="https://placehold.co/1200x600.png"
+                  src="https://images.pexels.com/photos/5199797/pexels-photo-5199797.jpeg"
                   alt="App screenshot"
                   width={1200}
                   height={600}
