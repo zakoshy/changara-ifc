@@ -3,21 +3,12 @@
 import type { Event } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, MapPin, Bell, HandHeart } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Calendar, Clock, MapPin, HandHeart } from 'lucide-react';
 import { GiveDialog } from './give-dialog';
 import { format } from 'date-fns';
+import { ReminderPopover } from './reminder-popover';
 
 export function EventCard({ event }: { event: Event }) {
-  const { toast } = useToast();
-
-  const handleSetReminder = () => {
-    toast({
-      title: 'Reminder Set!',
-      description: `We'll remind you about "${event.title}".`,
-    });
-  };
-
   const eventDate = new Date(event.date);
 
   return (
@@ -43,10 +34,7 @@ export function EventCard({ event }: { event: Event }) {
         <CardDescription>{event.description}</CardDescription>
       </CardContent>
       <CardFooter className="bg-muted/50 p-4 flex gap-2">
-        <Button variant="outline" className="w-full" onClick={handleSetReminder}>
-          <Bell className="mr-2 h-4 w-4" />
-          Set Reminder
-        </Button>
+        <ReminderPopover eventTitle={event.title} />
         <GiveDialog title={`Contribute to: ${event.title}`}>
           <Button className="w-full">
             <HandHeart className="mr-2 h-4 w-4" />

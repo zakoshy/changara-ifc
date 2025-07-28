@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, ChangeEvent } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,30 +21,32 @@ import { LoaderCircle, Upload, Mail, User as UserIcon, Phone, KeyRound } from 'l
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Separator } from '../ui/separator';
 
-function ProfileInfoRow({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
-    return (
-        <div className="flex items-center gap-4">
-            <div className="text-muted-foreground">{icon}</div>
-            <div>
-                <p className="text-sm text-muted-foreground">{label}</p>
-                <p className="font-medium">{value}</p>
-            </div>
-        </div>
-    );
+function ProfileInfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-4">
+      <div className="text-muted-foreground">{icon}</div>
+      <div>
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="font-medium">{value}</p>
+      </div>
+    </div>
+  );
 }
-
 
 export function ProfileDialog({ user, children }: { user: User; children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleSave();
+    }
+  };
+
   const handleSave = () => {
     startTransition(async () => {
-      // In a real app, you would upload the file to a storage service
-      // and get back a URL. For this demo, we'll just use a new placeholder.
       const newImageUrl = `https://placehold.co/128x128.png?text=${user.name.charAt(0)}&r=${Math.random()}`;
-
       const result = await updateUserProfilePicture(user.id, newImageUrl);
 
       if (result.success) {
@@ -52,9 +54,6 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
           title: 'Success!',
           description: result.message,
         });
-        setIsOpen(false);
-        // In a real app, you would likely need to trigger a page refresh 
-        // or re-fetch user data to see the change immediately.
         window.location.reload();
       } else {
         toast({
@@ -72,53 +71,48 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-headline">Your Profile</DialogTitle>
-          <DialogDescription>
-            View your profile information and update your picture.
-          </DialogDescription>
+          <DialogDescription>View your profile information and update your picture.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
-            <div className="flex flex-col items-center gap-4">
-                <Avatar className="h-32 w-32 border-2 border-primary/10">
-                    <AvatarImage src={user.imageUrl} alt={user.name} />
-                    <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                 <div className="space-y-1 text-center">
-                    <p className="text-xl font-semibold">{user.name}</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                 </div>
+          <div className="flex flex-col items-center gap-4">
+            <Avatar className="h-32 w-32 border-2 border-primary/10">
+              <AvatarImage src={user.imageUrl} alt={user.name} />
+              <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="space-y-1 text-center">
+              <p className="text-xl font-semibold">{user.name}</p>
+              <p className="text-sm text-muted-foreground">{user.email}</p>
             </div>
-          
-            <div className="space-y-4">
-                <ProfileInfoRow icon={<UserIcon className="w-5 h-5"/>} label="Full Name" value={user.name} />
-                <ProfileInfoRow icon={<Mail className="w-5 h-5"/>} label="Email Address" value={user.email} />
-                <ProfileInfoRow icon={<Phone className="w-5 h-5"/>} label="Phone Number" value={user.phone || 'Not provided'} />
-            </div>
-
-            <Separator />
-          
-            <div className="space-y-2">
-                <Label htmlFor="picture">Update Profile Picture</Label>
-                <div className="flex items-center gap-2">
-                    <Input id="picture" type="file" className="text-sm" />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                    Note: File upload is for demonstration. Clicking update will assign a new random avatar.
-                </p>
-            </div>
-             <Button variant="outline" asChild>
-                <Link href="/forgot-password">
-                    <KeyRound className="mr-2 h-4 w-4"/>
-                    Reset Password
-                </Link>
-            </Button>
+          </div>
+          <div className="space-y-4">
+            <ProfileInfoRow icon={<UserIcon className="w-5 h-5" />} label="Full Name" value={user.name} />
+            <ProfileInfoRow icon={<Mail className="w-5 h-5" />} label="Email Address" value={user.email} />
+            <ProfileInfoRow icon={<Phone className="w-5 h-5" />} label="Phone Number" value={user.phone || 'Not provided'} />
+          </div>
+          <Separator />
+          <div className="space-y-2">
+            <Label htmlFor="picture-upload">Update Profile Picture</Label>
+            <Input id="picture-upload" type="file" onChange={handleFileChange} className="text-sm" />
+            <p className="text-xs text-muted-foreground">
+              Note: A new random avatar will be generated upon file selection.
+            </p>
+          </div>
+          <Button variant="outline" asChild>
+            <Link href="/forgot-password">
+              <KeyRound className="mr-2 h-4 w-4" />
+              Reset Password
+            </Link>
+          </Button>
         </div>
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Close</Button>
+          <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>
+            Close
+          </Button>
           <Button type="button" onClick={handleSave} disabled={isPending}>
             {isPending ? (
-                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+              <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-                <Upload className="mr-2 h-4 w-4" />
+              <Upload className="mr-2 h-4 w-4" />
             )}
             Update Picture
           </Button>
