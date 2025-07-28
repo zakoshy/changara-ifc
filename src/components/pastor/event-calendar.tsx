@@ -185,13 +185,13 @@ export function EventCalendar({ events }: { events: Event[] }) {
         </div>
       </div>
       <Dialog open={isFormOpen} onOpenChange={closeForm}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingEvent ? 'Edit Event' : 'Create New Event'}</DialogTitle>
+            <DialogTitle>{editingEvent ? 'Edit Event' : 'Create New Event or Teaching'}</DialogTitle>
             <DialogDescription>
              {editingEvent 
                 ? "Update the details for your event."
-                : `Fill out the details for your new event on ${selectedDate ? format(selectedDate, "PPP") : ""}.`
+                : `Fill out the details for your new event on ${selectedDate ? format(selectedDate, "PPP") : ""}. Both sections are optional.`
              }
             </DialogDescription>
           </DialogHeader>
