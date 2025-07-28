@@ -24,21 +24,27 @@ import {
 } from '@/components/ui/sidebar';
 import { Users, User, LogOut, HandHeart, Calendar, PanelLeft } from 'lucide-react';
 
+// In a real app, you'd fetch the logged-in user's data from a session
+const pastor = {
+  name: 'John Doe',
+  email: 'pastor.doe@example.com',
+};
+
 const UserMenu = () => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button variant="ghost" className="relative h-8 w-8 rounded-full">
         <Avatar className="h-8 w-8">
           <AvatarImage src="https://placehold.co/40x40.png" alt="Pastor" data-ai-hint="pastor portrait"/>
-          <AvatarFallback>P</AvatarFallback>
+          <AvatarFallback>{pastor.name.charAt(0)}</AvatarFallback>
         </Avatar>
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent className="w-56" align="end" forceMount>
       <DropdownMenuLabel className="font-normal">
         <div className="flex flex-col space-y-1">
-          <p className="text-sm font-medium leading-none">Pastor</p>
-          <p className="text-xs leading-none text-muted-foreground">pastor@example.com</p>
+          <p className="text-sm font-medium leading-none">{pastor.name}</p>
+          <p className="text-xs leading-none text-muted-foreground">{pastor.email}</p>
         </div>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
@@ -102,10 +108,7 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
           <SidebarFooter>
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarTrigger>
-                       <PanelLeft />
-                       <span className="group-data-[collapsible=icon]:hidden">Collapse</span>
-                    </SidebarTrigger>
+                    <SidebarTrigger />
                 </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>
@@ -114,7 +117,7 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
           <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
             <SidebarTrigger className="md:hidden"/>
             <div className="w-full flex-1">
-              <h1 className="font-semibold text-lg">Pastor Dashboard</h1>
+              <h1 className="font-semibold text-lg">Welcome, Pastor {pastor.name.split(' ')[0]}</h1>
             </div>
             <UserMenu />
           </header>
