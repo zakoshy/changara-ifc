@@ -60,11 +60,13 @@ export async function getEvents(): Promise<Event[]> {
     const eventsCollection = db.collection('events');
     const events = await eventsCollection.find({}).toArray();
 
-    return events.map(event => ({
-      ...event,
-      id: event._id.toString(),
-      _id: event._id,
-    })) as Event[];
+    return events.map(event => {
+      const { _id, ...rest } = event;
+      return {
+        ...rest,
+        id: _id.toString(),
+      }
+    }) as Event[];
 
   } catch (error) {
     console.error("Failed to fetch events:", error);
