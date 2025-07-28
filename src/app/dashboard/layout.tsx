@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Calendar, HandHeart, User, LogOut, Sparkles } from 'lucide-react';
+import { HandHeart, User, LogOut, Sparkles } from 'lucide-react';
 import { GiveDialog } from '@/components/dashboard/give-dialog';
 import { ProfileDialog } from '@/components/dashboard/profile-dialog';
 import { useEffect, useState } from 'react';
@@ -91,7 +91,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
             <AppLogo />
             <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-                <Link href="/dashboard" className="text-muted-foreground transition-colors hover:text-foreground">
+                <Link href="/dashboard" className="text-foreground font-semibold transition-colors hover:text-foreground">
                     Events
                 </Link>
                 <GiveDialog title="Give Tithes">
@@ -102,10 +102,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </GiveDialog>
             </nav>
             <div className="flex w-full items-center justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4">
-                <UserMenu user={user} />
+                {user && <UserMenu user={user} />}
             </div>
           </header>
-          <main className="p-4 sm:px-6 sm:py-0">
+          <main className="p-4 sm:px-6">
             <div className="mx-auto max-w-7xl w-full">
                 {children}
             </div>

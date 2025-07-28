@@ -34,7 +34,7 @@ export function GiveDialog({ title, children }: { title: string, children: React
     
     toast({
       title: 'Thank You!',
-      description: `Your contribution of $${amount} has been received.`,
+      description: `Your contribution of Ksh ${amount} has been received.`,
     });
     setAmount('');
     setIsOpen(false);
@@ -52,25 +52,29 @@ export function GiveDialog({ title, children }: { title: string, children: React
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount</Label>
+            <Label htmlFor="amount">Amount (Ksh)</Label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground">Ksh</span>
               <Input
                 id="amount"
                 type="number"
-                placeholder="0.00"
+                placeholder="1000"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="pl-8"
+                className="pl-10"
               />
             </div>
           </div>
           <div className="space-y-2">
             <Label>Payment Method</Label>
-            <RadioGroup defaultValue="card" className="flex gap-4">
+            <RadioGroup defaultValue="mpesa" className="flex gap-4">
                 <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="mpesa" id="mpesa" />
+                    <Label htmlFor="mpesa" className="flex items-center gap-2 font-normal">M-Pesa</Label>
+                </div>
+                 <div className="flex items-center space-x-2">
                     <RadioGroupItem value="card" id="card" />
-                    <Label htmlFor="card" className="flex items-center gap-2 font-normal"><CreditCard className="w-4 h-4"/> Credit/Debit Card</Label>
+                    <Label htmlFor="card" className="flex items-center gap-2 font-normal"><CreditCard className="w-4 h-4"/> Card</Label>
                 </div>
             </RadioGroup>
           </div>

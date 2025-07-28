@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Clock, MapPin, Bell, HandHeart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { GiveDialog } from './give-dialog';
+import { format } from 'date-fns';
 
 export function EventCard({ event }: { event: Event }) {
   const { toast } = useToast();
@@ -17,6 +18,8 @@ export function EventCard({ event }: { event: Event }) {
       description: `We'll remind you about "${event.title}".`,
     });
   };
+
+  const eventDate = new Date(event.date);
 
   return (
     <Card className="flex flex-col overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105">
@@ -35,7 +38,7 @@ export function EventCard({ event }: { event: Event }) {
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
-              <span>{event.date}</span>
+              <span>{format(eventDate, 'PPP')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Clock className="h-4 w-4" />
