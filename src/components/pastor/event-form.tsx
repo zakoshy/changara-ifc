@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useActionState, useEffect, useState, useRef } from 'react';
+import { useActionState, useEffect, useState, useRef, ChangeEvent } from 'react';
 import { useFormStatus } from 'react-dom';
 import { createEvent, updateEvent } from '@/actions/events';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import Image from 'next/image';
 
 
 const initialState = {
@@ -51,11 +52,11 @@ export function EventForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const isEditing = !!event;
-  // Use updateEvent if editing, otherwise use the combined createEvent
   const action = isEditing ? updateEvent : createEvent;
   const [state, formAction] = useActionState(action, initialState);
 
   const [teachingMediaType, setTeachingMediaType] = useState<'photo' | 'video' | 'audio'>('photo');
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (state.success) {
@@ -72,6 +73,18 @@ export function EventForm({
     setTeachingMediaType(type);
     fileInputRef.current?.click();
   }
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMediaPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
 
   return (
     <form action={formAction} className="space-y-6">
@@ -125,7 +138,33 @@ export function EventForm({
             <CardDescription>This section is optional. Use it to post standalone teachings.</CardDescription>
           </CardHeader>
           <input type="hidden" name="teachingMediaType" value={teachingMediaType} />
-          <Input id="teachingMediaUrl" name="teachingMediaUrl" type="file" ref={fileInputRef} className="hidden"/>
+          <Input 
+            id="teachingMediaUrl" 
+            name="teachingMediaUrl" 
+            type="file" 
+            ref={fileInputRef} 
+            className="hidden"
+            onChange={handleFileChange} 
+            accept="image/*,video/*,audio/*"
+          />
+
+          {mediaPreview && (
+             <div className="mt-4 p-2 border rounded-md">
+                <p className="text-sm font-medium mb-2">Media Preview:</p>
+                <div className="flex justify-center items-center bg-muted rounded-md">
+                {teachingMediaType === 'photo' && (
+                    <Image src={mediaPreview} alt="Preview" width={400} height={300} className="rounded-md object-contain max-h-60" />
+                )}
+                {teachingMediaType === 'video' && (
+                    <video src={mediaPreview} controls className="w-full rounded-md max-h-60">Your browser does not support the video tag.</video>
+                )}
+                {teachingMediaType === 'audio' && (
+                    <audio src={mediaPreview} controls className="w-full">Your browser does not support the audio element.</audio>
+                )}
+                </div>
+            </div>
+          )}
+
 
           <div className="space-y-2">
             <Label htmlFor="teachingText">Teaching Notes</Label>
@@ -153,7 +192,7 @@ export function EventForm({
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-            <p className="text-xs text-muted-foreground">Click the plus icon to attach media. This is a placeholder and does not currently upload a file.</p>
+            <p className="text-xs text-muted-foreground">Click the plus icon to attach media.</p>
           </div>
        </div>
 
