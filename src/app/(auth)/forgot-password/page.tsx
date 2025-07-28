@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useActionState, useEffect } from 'react';
 import Link from 'next/link';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,7 +29,7 @@ function SubmitButton() {
 
 export default function ForgotPasswordPage() {
   const { toast } = useToast();
-  const [state, formAction] = useFormState(requestPasswordReset, initialState);
+  const [state, formAction] = useActionState(requestPasswordReset, initialState);
 
   useEffect(() => {
     if (state.success && state.message) {

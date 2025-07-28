@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useEffect } from 'react';
+import { useFormStatus } from 'react-dom';
 import { createEvent } from '@/actions/events';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +30,7 @@ function SubmitButton() {
 
 export function EventForm({ selectedDate, onFinished }: { selectedDate?: Date; onFinished: () => void }) {
   const { toast } = useToast();
-  const [state, formAction] = useFormState(createEvent, initialState);
+  const [state, formAction] = useActionState(createEvent, initialState);
 
   useEffect(() => {
     if (state.success) {
