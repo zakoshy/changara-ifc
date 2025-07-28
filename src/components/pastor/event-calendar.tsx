@@ -1,11 +1,10 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { EventForm } from "./event-form";
-import type { Event } from "@/lib/types";
+import type { Event, Teaching } from "@/lib/types";
 import {
   Dialog,
   DialogContent,
@@ -25,26 +24,28 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "../ui/button";
-import { Trash, LoaderCircle, Edit } from "lucide-react";
+import { Trash, LoaderCircle, Edit, FileText, Video, Mic, Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Skeleton } from "../ui/skeleton";
-import { deleteEvent } from "@/actions/events";
+import { deleteEvent, deleteTeaching } from "@/actions/events";
 import { useToast } from "@/hooks/use-toast";
 
 
 // This new component defers date formatting to the client side to avoid hydration errors.
-function EventDateDisplay({ date, time }: { date: string, time: string }) {
+function ItemDateDisplay({ date, time }: { date: string, time?: string }) {
     const [formattedDate, setFormattedDate] = useState('');
 
     useEffect(() => {
         // new Date() can cause mismatches between server and client timezones.
         // Running it in useEffect ensures it only runs on the client after hydration.
         try {
-            setFormattedDate(format(new Date(date), "PPP"));
+            const dateObj = new Date(date);
+            const dateString = format(dateObj, "PPP");
+            setFormattedDate(time ? `${dateString} at ${time}`: `Posted on ${dateString}`);
         } catch(e) {
             setFormattedDate('Invalid Date');
         }
-    }, [date]);
+    }, [date, time]);
 
     if (!formattedDate) {
         // You can return a placeholder/loader here if needed
@@ -52,17 +53,18 @@ function EventDateDisplay({ date, time }: { date: string, time: string }) {
     }
 
     return (
-        <p className="text-sm text-muted-foreground">{formattedDate} at {time}</p>
+        <p className="text-sm text-muted-foreground">{formattedDate}</p>
     );
 }
 
-function DeleteEventButton({ eventId, eventTitle }: { eventId: string, eventTitle: string}) {
+function DeleteItemButton({ item, isEvent }: { item: Event | Teaching, isEvent: boolean }) {
     const [isPending, startTransition] = React.useTransition();
     const { toast } = useToast();
 
     const handleDelete = () => {
         startTransition(async () => {
-            const result = await deleteEvent(eventId);
+            const action = isEvent ? deleteEvent : deleteTeaching;
+            const result = await action(item.id);
             if(result.success) {
                 toast({ title: "Success", description: result.message });
             } else {
@@ -70,6 +72,8 @@ function DeleteEventButton({ eventId, eventTitle }: { eventId: string, eventTitl
             }
         });
     };
+    
+    const title = isEvent ? (item as Event).title : (item as Teaching).text?.substring(0, 30) + '...';
 
     return (
         <AlertDialog>
@@ -82,7 +86,7 @@ function DeleteEventButton({ eventId, eventTitle }: { eventId: string, eventTitl
                 <AlertDialogHeader>
                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This will permanently delete the event: "{eventTitle}". This action cannot be undone.
+                        This will permanently delete "{title}". This action cannot be undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -97,19 +101,37 @@ function DeleteEventButton({ eventId, eventTitle }: { eventId: string, eventTitl
     );
 }
 
+const renderTeachingIcon = (mediaType: 'photo' | 'video' | 'audio' | undefined) => {
+    switch (mediaType) {
+        case 'video': return <Video className="h-4 w-4 text-muted-foreground" />;
+        case 'audio': return <Mic className="h-4 w-4 text-muted-foreground" />;
+        default: return <FileText className="h-4 w-4 text-muted-foreground" />;
+    }
+};
 
-export function EventCalendar({ events }: { events: Event[] }) {
+
+export function EventCalendar({ events, teachings }: { events: Event[], teachings: Teaching[] }) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
-
 
   useEffect(() => {
     // This ensures the calendar only renders on the client, avoiding hydration errors
     setIsClient(true);
     setSelectedDate(new Date());
   }, []);
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const upcomingEvents = events.filter(event => new Date(event.date) >= today);
+  const upcomingTeachings = teachings.filter(teaching => new Date(teaching.createdAt) >= today);
+
+  const combinedItems = [
+    ...upcomingEvents.map(item => ({...item, type: 'event', sortDate: new Date(item.date)})),
+    ...upcomingTeachings.map(item => ({...item, type: 'teaching', sortDate: new Date(item.createdAt)}))
+  ].sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime());
 
   const eventDates = events.map(event => {
       try {
@@ -132,6 +154,12 @@ export function EventCalendar({ events }: { events: Event[] }) {
     setIsFormOpen(true);
   }
 
+  // TODO: Add handler for editing teachings
+  const handleEditTeachingClick = (teaching: Teaching) => {
+    // For now, we'll just log this. Implementation would require a dedicated form.
+    console.log("Editing teaching: ", teaching);
+  }
+
   const closeForm = () => {
     setIsFormOpen(false);
     setEditingEvent(null);
@@ -141,7 +169,7 @@ export function EventCalendar({ events }: { events: Event[] }) {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
       <div className="md:col-span-2">
         <h1 className="text-2xl font-bold tracking-tight font-headline">Event Management</h1>
-        <p className="text-muted-foreground mb-6">Click a date to create an event. View and manage upcoming events.</p>
+        <p className="text-muted-foreground mb-6">Click a date to create an event. View and manage upcoming events and teachings.</p>
         <div className="rounded-md border bg-card p-4">
             {isClient ? (
                 <Calendar
@@ -163,25 +191,30 @@ export function EventCalendar({ events }: { events: Event[] }) {
         </div>
       </div>
       <div>
-        <h2 className="font-headline text-lg mb-4">Upcoming Events</h2>
+        <h2 className="font-headline text-lg mb-4">Upcoming</h2>
         <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-            {events.length > 0 ? events.map(event => (
-                <div key={event.id} className="p-4 rounded-md border bg-card/50">
+            {combinedItems.length > 0 ? combinedItems.map(item => (
+                <div key={`${item.type}-${item.id}`} className="p-4 rounded-md border bg-card/50">
                     <div className="flex justify-between items-start">
-                        <div>
-                            <h3 className="font-semibold">{event.title}</h3>
-                            <EventDateDisplay date={event.date} time={event.time} />
+                        <div className="flex items-start gap-3">
+                            <div className="mt-1">
+                                {item.type === 'event' ? <CalendarIcon className="h-4 w-4 text-muted-foreground" /> : renderTeachingIcon((item as Teaching).mediaType)}
+                            </div>
+                            <div>
+                                <h3 className="font-semibold">{item.type === 'event' ? (item as Event).title : (item as Teaching).text || 'Media Teaching'}</h3>
+                                <ItemDateDisplay date={item.type === 'event' ? (item as Event).date : (item as Teaching).createdAt} time={item.type === 'event' ? (item as Event).time : undefined} />
+                            </div>
                         </div>
                          <div className="flex items-center gap-2">
-                            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleEditClick(event)}>
+                            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => item.type === 'event' ? handleEditClick(item as Event) : handleEditTeachingClick(item as Teaching)}>
                                 <Edit className="h-4 w-4" />
                             </Button>
-                            <DeleteEventButton eventId={event.id} eventTitle={event.title} />
+                            <DeleteItemButton item={item} isEvent={item.type === 'event'} />
                         </div>
                     </div>
-                    <p className="text-sm mt-2">{event.description}</p>
+                    {item.type === 'event' && <p className="text-sm mt-2">{(item as Event).description}</p>}
                 </div>
-            )) : <p className="text-sm text-muted-foreground">No upcoming events. Click a date on the calendar to add one.</p>}
+            )) : <p className="text-sm text-muted-foreground">No upcoming items. Click a date on the calendar to add one.</p>}
         </div>
       </div>
       <Dialog open={isFormOpen} onOpenChange={closeForm}>
