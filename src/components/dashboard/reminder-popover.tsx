@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Bell, BellCheck, BellRing } from 'lucide-react';
+import { Bell, CheckSquare, BellRing } from 'lucide-react';
 
 export function ReminderPopover({ eventTitle }: { eventTitle: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,7 +49,7 @@ export function ReminderPopover({ eventTitle }: { eventTitle: string }) {
           className="flex-1 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
           <div className="flex items-center gap-2 text-primary">
-            <BellCheck className="h-4 w-4" />
+            <CheckSquare className="h-4 w-4" />
             <span>Reminder set for {reminderTime}</span>
           </div>
         </Label>
