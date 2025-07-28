@@ -10,10 +10,12 @@ import { columns as contributionColumns } from '@/components/pastor/contribution
 
 
 export default async function PastorDashboardPage() {
-  const members = await getUsers();
+  const allUsers = await getUsers();
   const contributions = await getContributions();
   const events = await getEvents();
   
+  // Filter out the pastor from the list of members
+  const members = allUsers.filter(user => user.role !== 'pastor');
   const sortedMembers = [...members].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
