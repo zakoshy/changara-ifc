@@ -68,7 +68,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <SidebarProvider>
       <div className="min-h-screen w-full">
-        <Sidebar className="border-r bg-primary/90 text-primary-foreground backdrop-blur-sm" collapsible="icon">
+        <Sidebar className="border-r bg-primary text-primary-foreground" collapsible="icon">
           <SidebarHeader>
               <AppLogo />
           </SidebarHeader>

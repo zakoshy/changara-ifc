@@ -51,7 +51,7 @@ export default function LandingPage() {
             className="absolute inset-0 z-0"
             data-ai-hint="church community"
           />
-          <div className="absolute inset-0 bg-black/50 z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20 z-10"></div>
           <div className="container relative z-20 text-center">
             <div className="mx-auto max-w-3xl">
               <h1 className="text-4xl font-bold tracking-tight sm:text-6xl font-headline">
@@ -64,7 +64,7 @@ export default function LandingPage() {
                 <Button size="lg" asChild>
                   <Link href="/signup">Get Started</Link>
                 </Button>
-                <Button size="lg" variant="secondary" asChild>
+                <Button size="lg" variant="outline" className="bg-transparent text-white hover:bg-white hover:text-primary" asChild>
                   <Link href="/pastor/login">Pastor's Area <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
               </div>
