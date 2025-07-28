@@ -27,7 +27,7 @@ import { Button } from "../ui/button";
 import { Trash, LoaderCircle, Edit, FileText, Video, Mic, Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Skeleton } from "../ui/skeleton";
-import { deleteEvent, deleteTeaching } from "@/actions/events";
+import { deleteEvent, deleteTeaching, getTeachingById } from "@/actions/events";
 import { useToast } from "@/hooks/use-toast";
 
 
@@ -115,6 +115,8 @@ export function EventCalendar({ events, teachings }: { events: Event[], teaching
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [editingTeaching, setEditingTeaching] = useState<Teaching | null>(null);
+
 
   useEffect(() => {
     // This ensures the calendar only renders on the client, avoiding hydration errors
@@ -126,11 +128,16 @@ export function EventCalendar({ events, teachings }: { events: Event[], teaching
   today.setHours(0, 0, 0, 0);
 
   const upcomingEvents = events.filter(event => new Date(event.date) >= today);
-  const upcomingTeachings = teachings.filter(teaching => new Date(teaching.createdAt) >= today);
+  
+  // Filter out teachings that are already linked to an upcoming event
+  const eventTeachingIds = new Set(upcomingEvents.map(e => e.teachingId).filter(Boolean));
+  const upcomingStandaloneTeachings = teachings
+    .filter(teaching => new Date(teaching.createdAt) >= today && !eventTeachingIds.has(teaching.id));
+
 
   const combinedItems = [
     ...upcomingEvents.map(item => ({...item, type: 'event', sortDate: new Date(item.date)})),
-    ...upcomingTeachings.map(item => ({...item, type: 'teaching', sortDate: new Date(item.createdAt)}))
+    ...upcomingStandaloneTeachings.map(item => ({...item, type: 'teaching', sortDate: new Date(item.createdAt)}))
   ].sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime());
 
   const eventDates = events.map(event => {
@@ -144,25 +151,35 @@ export function EventCalendar({ events, teachings }: { events: Event[], teaching
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
     setSelectedDate(date);
-    setEditingEvent(null); // Clear any editing state
+    setEditingEvent(null);
+    setEditingTeaching(null);
     setIsFormOpen(true);
   };
   
-  const handleEditClick = (event: Event) => {
-    setEditingEvent(event);
-    setSelectedDate(new Date(event.date));
+  const handleEditClick = async (item: Event | Teaching) => {
+    if (item.type === 'event') {
+        const event = item as Event;
+        setEditingEvent(event);
+        setSelectedDate(new Date(event.date));
+        if (event.teachingId) {
+            const teachingData = await getTeachingById(event.teachingId);
+            setEditingTeaching(teachingData);
+        } else {
+            setEditingTeaching(null);
+        }
+    } else {
+        const teaching = item as Teaching;
+        setEditingTeaching(teaching);
+        setEditingEvent(null); // No associated event
+        setSelectedDate(new Date(teaching.createdAt));
+    }
     setIsFormOpen(true);
-  }
-
-  // TODO: Add handler for editing teachings
-  const handleEditTeachingClick = (teaching: Teaching) => {
-    // For now, we'll just log this. Implementation would require a dedicated form.
-    console.log("Editing teaching: ", teaching);
   }
 
   const closeForm = () => {
     setIsFormOpen(false);
     setEditingEvent(null);
+    setEditingTeaching(null);
   }
 
   return (
@@ -206,7 +223,7 @@ export function EventCalendar({ events, teachings }: { events: Event[], teaching
                             </div>
                         </div>
                          <div className="flex items-center gap-2">
-                            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => item.type === 'event' ? handleEditClick(item as Event) : handleEditTeachingClick(item as Teaching)}>
+                            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleEditClick(item)}>
                                 <Edit className="h-4 w-4" />
                             </Button>
                             <DeleteItemButton item={item} isEvent={item.type === 'event'} />
@@ -220,11 +237,11 @@ export function EventCalendar({ events, teachings }: { events: Event[], teaching
       <Dialog open={isFormOpen} onOpenChange={closeForm}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingEvent ? 'Edit Event' : 'Create New Event or Teaching'}</DialogTitle>
+            <DialogTitle>{editingEvent ? 'Edit Event & Teaching' : 'Create New Event or Teaching'}</DialogTitle>
             <DialogDescription>
              {editingEvent 
-                ? "Update the details for your event."
-                : `Fill out the details for your new event on ${selectedDate ? format(selectedDate, "PPP") : ""}. Both sections are optional.`
+                ? "Update the details for your event and the linked teaching."
+                : `Fill out the details for your new item on ${selectedDate ? format(selectedDate, "PPP") : ""}. Both sections are optional.`
              }
             </DialogDescription>
           </DialogHeader>
@@ -232,6 +249,7 @@ export function EventCalendar({ events, teachings }: { events: Event[], teaching
             selectedDate={selectedDate}
             onFinished={closeForm}
             event={editingEvent}
+            teaching={editingTeaching}
           />
         </DialogContent>
       </Dialog>

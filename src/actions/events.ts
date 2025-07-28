@@ -4,7 +4,7 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import clientPromise from '@/lib/mongodb';
-import { Event } from '@/lib/types';
+import { Event, Teaching } from '@/lib/types';
 import { ObjectId } from 'mongodb';
 import {v4 as uuidv4} from 'uuid';
 
@@ -32,7 +32,10 @@ const eventUpdateSchema = z.object({
     date: z.string().min(1, 'Date is required.'),
     time: z.string().min(1, 'Time is required.'),
     location: z.string().min(1, 'Location is required.'),
-    teachingUrl: z.any().optional(),
+    
+    // Teaching fields for update
+    teachingId: z.string().optional(),
+    teachingText: z.string().optional(),
 });
 
 
@@ -63,23 +66,9 @@ export async function createEvent(prevState: any, formData: FormData) {
     const client = await clientPromise;
     const db = client.db();
     
-    const creationPromises = [];
-    
-    // Prepare Event creation if data is present
-    if (isEventDataPresent) {
-        const eventsCollection = db.collection('events');
-        const eventPromise = eventsCollection.insertOne({
-            title,
-            description,
-            date,
-            time,
-            location,
-            imageUrl: 'https://placehold.co/600x400.png' // Placeholder image
-        });
-        creationPromises.push(eventPromise);
-    }
+    let teachingId: string | undefined = undefined;
 
-    // Prepare Teaching creation if data is present
+    // If teaching data is present, create it first.
     if (isTeachingDataPresent) {
         const teachingsCollection = db.collection('teachings');
         let mediaUrl = 'https://placehold.co/600x400.png';
@@ -89,18 +78,30 @@ export async function createEvent(prevState: any, formData: FormData) {
             mediaUrl = 'https://placehold.co/600x400.png/E8E8E8/000000?text=Audio';
         }
 
-        const teachingPromise = teachingsCollection.insertOne({
-          id: uuidv4(),
+        const newTeachingId = uuidv4();
+        await teachingsCollection.insertOne({
+          id: newTeachingId,
           text: teachingText,
           mediaType: teachingMediaType || 'photo',
           mediaUrl,
           createdAt: new Date().toISOString(),
         });
-        creationPromises.push(teachingPromise);
+        teachingId = newTeachingId;
     }
-
-    // Execute all database operations in parallel
-    await Promise.all(creationPromises);
+    
+    // Prepare Event creation if data is present
+    if (isEventDataPresent) {
+        const eventsCollection = db.collection('events');
+        await eventsCollection.insertOne({
+            title,
+            description,
+            date,
+            time,
+            location,
+            imageUrl: 'https://placehold.co/600x400.png', // Placeholder image
+            teachingId: teachingId, // Link the teaching if it was created
+        });
+    }
 
     revalidatePath('/pastor/dashboard');
     
@@ -138,7 +139,7 @@ export async function updateEvent(prevState: any, formData: FormData) {
   }
   
   try {
-    const { id, teachingUrl, ...eventData } = validatedFields.data;
+    const { id, teachingId, teachingText, ...eventData } = validatedFields.data;
 
     if (!ObjectId.isValid(id)) {
       return { message: 'Invalid event ID.' };
@@ -147,11 +148,27 @@ export async function updateEvent(prevState: any, formData: FormData) {
     const client = await clientPromise;
     const db = client.db();
     const eventsCollection = db.collection('events');
+    
+    const updatePromises = [];
 
-    await eventsCollection.updateOne(
+    // Update the event document
+    const eventUpdatePromise = eventsCollection.updateOne(
         { _id: new ObjectId(id) },
         { $set: eventData }
     );
+    updatePromises.push(eventUpdatePromise);
+    
+    // If there's a linked teaching, update it as well.
+    if (teachingId) {
+        const teachingsCollection = db.collection('teachings');
+        const teachingUpdatePromise = teachingsCollection.updateOne(
+            { id: teachingId },
+            { $set: { text: teachingText } }
+        );
+        updatePromises.push(teachingUpdatePromise);
+    }
+
+    await Promise.all(updatePromises);
     
     revalidatePath('/pastor/dashboard');
     return {
@@ -180,6 +197,7 @@ export async function getEvents(): Promise<Event[]> {
       _id: undefined, // remove non-serializable object
       id: (event._id as ObjectId).toString(),
       imageUrl: event.imageUrl || 'https://placehold.co/600x400.png',
+      teachingId: event.teachingId,
     })) as Event[];
 
   } catch (error) {
@@ -230,6 +248,29 @@ export async function getTeachings(): Promise<Teaching[]> {
     return [];
   }
 }
+
+export async function getTeachingById(teachingId: string): Promise<Teaching | null> {
+    if (!teachingId) return null;
+    try {
+        const client = await clientPromise;
+        const db = client.db();
+        const teachingsCollection = db.collection('teachings');
+        const teaching = await teachingsCollection.findOne({ id: teachingId });
+
+        if (!teaching) return null;
+
+        return {
+            ...teaching,
+            _id: undefined,
+            id: teaching.id as string,
+        } as Teaching;
+
+    } catch (error) {
+        console.error("Failed to fetch teaching by ID:", error);
+        return null;
+    }
+}
+
 
 export async function deleteTeaching(teachingId: string) {
   try {

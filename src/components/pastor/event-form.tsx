@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { LoaderCircle, Plus, FileImage, Video, Mic } from 'lucide-react';
 import { format } from 'date-fns';
-import type { Event } from '@/lib/types';
+import type { Event, Teaching } from '@/lib/types';
 import { Card, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import {
   DropdownMenu,
@@ -42,11 +42,13 @@ function SubmitButton({ isEditing }: { isEditing: boolean }) {
 export function EventForm({ 
     selectedDate, 
     onFinished,
-    event 
+    event,
+    teaching,
 }: { 
     selectedDate?: Date; 
     onFinished: () => void;
     event?: Event | null;
+    teaching?: Teaching | null;
 }) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,6 +59,15 @@ export function EventForm({
 
   const [teachingMediaType, setTeachingMediaType] = useState<'photo' | 'video' | 'audio'>('photo');
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  
+  // When the component loads in edit mode, set the media preview from the teaching prop
+  useEffect(() => {
+    if (teaching?.mediaUrl) {
+      setMediaPreview(teaching.mediaUrl);
+      setTeachingMediaType(teaching.mediaType);
+    }
+  }, [teaching]);
+
 
   useEffect(() => {
     if (state.success) {
@@ -71,7 +82,9 @@ export function EventForm({
   
   const handleMediaSelect = (type: 'photo' | 'video' | 'audio') => {
     setTeachingMediaType(type);
-    fileInputRef.current?.click();
+    if (!isEditing) {
+        fileInputRef.current?.click();
+    }
   }
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -103,8 +116,9 @@ export function EventForm({
         </CardHeader>
         
         <input type="hidden" name="date" value={dateValue} />
-        {isEditing && <input type="hidden" name="id" value={event.id} />}
-        
+        {isEditing && event && <input type="hidden" name="id" value={event.id} />}
+        {isEditing && teaching && <input type="hidden" name="teachingId" value={teaching.id} />}
+
         <div className="space-y-2">
           <Label htmlFor="title">Event Title</Label>
           <Input id="title" name="title" placeholder="e.g., Sunday Service" defaultValue={event?.title}/>
@@ -134,8 +148,8 @@ export function EventForm({
       {/* --- TEACHING FORM --- */}
        <div className="space-y-4 p-4 border rounded-lg">
           <CardHeader className="p-0">
-            <CardTitle className="text-lg">Create a Teaching</CardTitle>
-            <CardDescription>This section is optional. Use it to post standalone teachings.</CardDescription>
+            <CardTitle className="text-lg">Create or Edit a Teaching</CardTitle>
+            <CardDescription>This can be linked to the event or stand alone. In edit mode, only text can be changed.</CardDescription>
           </CardHeader>
           <input type="hidden" name="teachingMediaType" value={teachingMediaType} />
           <Input 
@@ -146,6 +160,7 @@ export function EventForm({
             className="hidden"
             onChange={handleFileChange} 
             accept="image/*,video/*,audio/*"
+            disabled={isEditing}
           />
 
           {mediaPreview && (
@@ -169,10 +184,10 @@ export function EventForm({
           <div className="space-y-2">
             <Label htmlFor="teachingText">Teaching Notes</Label>
             <div className="relative">
-                <Textarea id="teachingText" name="teachingText" placeholder="Type your sermon notes or teaching points here..." rows={5} className="pl-12"/>
+                <Textarea id="teachingText" name="teachingText" placeholder="Type your sermon notes or teaching points here..." rows={5} className="pl-12" defaultValue={teaching?.text} />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="absolute bottom-2 left-2 h-8 w-8">
+                        <Button variant="ghost" size="icon" className="absolute bottom-2 left-2 h-8 w-8" disabled={isEditing}>
                             <Plus className="h-4 w-4"/>
                         </Button>
                     </DropdownMenuTrigger>
@@ -192,7 +207,9 @@ export function EventForm({
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-            <p className="text-xs text-muted-foreground">Click the plus icon to attach media.</p>
+            <p className="text-xs text-muted-foreground">
+                {isEditing ? "Media cannot be changed in edit mode." : "Click the plus icon to attach media."}
+            </p>
           </div>
        </div>
 

@@ -23,7 +23,7 @@ export type Event = {
   location: string;
   description: string;
   imageUrl: string;
-  teachingUrl?: string;
+  teachingId?: string;
 };
 
 export type Contribution = {
