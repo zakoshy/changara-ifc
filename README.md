@@ -1,1 +1,0 @@
-This is a church portal that i have created to make the church services easier and managable for those who are far from their respective churches
