@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -11,29 +13,36 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Calendar, HandHeart, User, LogOut, Sparkles } from 'lucide-react';
 import { GiveDialog } from '@/components/dashboard/give-dialog';
+import { ProfileDialog } from '@/components/dashboard/profile-dialog';
+import { useEffect, useState } from 'react';
+import { getUserById } from '@/actions/users';
+import type { User as UserType } from '@/lib/types';
 
-const UserMenu = () => (
+
+const UserMenu = ({ user }: { user: UserType }) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button variant="ghost" className="relative h-8 w-8 rounded-full">
         <Avatar className="h-8 w-8">
-          <AvatarImage src="https://placehold.co/40x40.png" alt="User" />
-          <AvatarFallback>A</AvatarFallback>
+          <AvatarImage src={user.imageUrl} alt={user.name} data-ai-hint="user profile" />
+          <AvatarFallback>{user.name ? user.name.charAt(0) : 'U'}</AvatarFallback>
         </Avatar>
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent className="w-56" align="end" forceMount>
       <DropdownMenuLabel className="font-normal">
         <div className="flex flex-col space-y-1">
-          <p className="text-sm font-medium leading-none">Member</p>
-          <p className="text-xs leading-none text-muted-foreground">member@example.com</p>
+          <p className="text-sm font-medium leading-none">{user.name}</p>
+          <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
         </div>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem>
-        <User className="mr-2 h-4 w-4" />
-        <span>Profile</span>
-      </DropdownMenuItem>
+       <ProfileDialog user={user}>
+          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+          </DropdownMenuItem>
+      </ProfileDialog>
       <DropdownMenuSeparator />
       <DropdownMenuItem asChild>
         <Link href="/">
@@ -57,6 +66,26 @@ const AppLogo = () => (
 );
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<UserType | null>(null);
+
+  useEffect(() => {
+    // In a real app, you would get the current user from a session.
+    // For this demo, we'll fetch the first member user from the DB.
+    async function fetchUser() {
+      const userData = await getUserById('mock-user-id'); // ID is unused in the mock
+      setUser(userData);
+    }
+    fetchUser();
+  }, []);
+
+  if (!user) {
+    return (
+        <div className="flex items-center justify-center min-h-screen">
+            <p>Loading...</p>
+        </div>
+    );
+  }
+
   return (
       <div className="min-h-screen w-full flex flex-col">
           <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
@@ -73,10 +102,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </GiveDialog>
             </nav>
             <div className="flex w-full items-center justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4">
-                <UserMenu />
+                <UserMenu user={user} />
             </div>
           </header>
-          <main className="p-4 sm:px-6 sm:py-6 bg-muted/40 flex-1">
+          <main className="p-4 sm:px-6 sm:py-0">
             <div className="mx-auto max-w-7xl w-full">
                 {children}
             </div>

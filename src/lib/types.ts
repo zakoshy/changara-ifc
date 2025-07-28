@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 export type User = {
   _id?: ObjectId;
-  id?: string; // from placeholder
+  id: string; 
   name: string;
   email: string;
   role: 'member' | 'pastor';
