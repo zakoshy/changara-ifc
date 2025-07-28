@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import * as React from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { EventForm } from "./event-form";
 import type { Event } from "@/lib/types";
