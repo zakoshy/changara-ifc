@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -12,7 +13,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { Badge } from "../ui/badge";
+import { Skeleton } from "../ui/skeleton";
+
 
 // This new component defers date formatting to the client side to avoid hydration errors.
 function EventDateDisplay({ date, time }: { date: string, time: string }) {
@@ -36,8 +38,15 @@ function EventDateDisplay({ date, time }: { date: string, time: string }) {
 
 
 export function EventCalendar({ events }: { events: Event[] }) {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    // This ensures the calendar only renders on the client, avoiding hydration errors
+    setIsClient(true);
+    setSelectedDate(new Date());
+  }, []);
 
   const eventDates = events.map(event => new Date(event.date));
 
@@ -51,18 +60,23 @@ export function EventCalendar({ events }: { events: Event[] }) {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
       <div className="md:col-span-2">
         <div className="rounded-md border bg-card p-4">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={handleDateSelect}
-              className="p-0"
-              modifiers={{
-                events: eventDates,
-              }}
-              modifiersClassNames={{
-                events: "bg-primary/20 rounded-full",
-              }}
-            />
+            {isClient ? (
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={handleDateSelect}
+                  className="p-0"
+                  modifiers={{
+                    events: eventDates,
+                  }}
+                  modifiersClassNames={{
+                    events: "bg-primary/20 rounded-full",
+                  }}
+                  initialFocus
+                />
+            ) : (
+                <Skeleton className="h-[298px] w-full" />
+            )}
         </div>
       </div>
       <div>
