@@ -105,13 +105,16 @@ export async function signup(prevState: any, formData: FormData) {
     }
     
     const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Assign 'pastor' role if the email matches, otherwise assign 'member'
+    const userRole = email === 'zakayooshome254@gmail.com' ? 'pastor' : 'member';
 
     await usersCollection.insertOne({
       name,
       email,
       phone,
       password: hashedPassword,
-      role: 'member',
+      role: userRole,
       joinedAt: new Date().toISOString(),
     });
 
