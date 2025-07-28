@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Changara Connect',
-  description: 'Connecting the community of IFC Changara.',
+  title: 'IFC Changara',
+  description: 'Welcome to IFC Changara.',
 };
 
 export default function RootLayout({

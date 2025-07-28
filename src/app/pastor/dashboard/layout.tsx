@@ -21,7 +21,7 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { Church, Users, User, LogOut } from 'lucide-react';
+import { Users, User, LogOut } from 'lucide-react';
 
 const UserMenu = () => (
   <DropdownMenu>
@@ -58,9 +58,8 @@ const UserMenu = () => (
 
 const AppLogo = () => (
     <Link href="/pastor/dashboard" className="flex items-center gap-2 text-lg font-semibold" prefetch={false}>
-      <Church className="h-6 w-6 text-primary" />
       <span className="font-headline text-foreground group-data-[collapsible=icon]:hidden">
-        Changara Connect
+        IFC Changara
       </span>
     </Link>
 );
