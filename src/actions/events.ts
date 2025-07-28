@@ -75,3 +75,27 @@ export async function getEvents(): Promise<Event[]> {
     return [];
   }
 }
+
+export async function deleteEvent(eventId: string) {
+  try {
+    if (!ObjectId.isValid(eventId)) {
+      return { success: false, message: 'Invalid event ID.' };
+    }
+    
+    const client = await clientPromise;
+    const db = client.db();
+    const eventsCollection = db.collection('events');
+
+    const result = await eventsCollection.deleteOne({ _id: new ObjectId(eventId) });
+    
+    if (result.deletedCount === 0) {
+      return { success: false, message: 'Could not find event to delete.' };
+    }
+
+    revalidatePath('/pastor/dashboard');
+    return { success: true, message: 'Event deleted successfully.' };
+  } catch (error) {
+    console.error('Delete event error:', error);
+    return { success: false, message: 'An unexpected error occurred.' };
+  }
+}

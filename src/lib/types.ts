@@ -33,3 +33,12 @@ export type Contribution = {
     userEmail: string;
     date: string;
 };
+
+export type Teaching = {
+  _id?: ObjectId;
+  id: string;
+  mediaType: 'photo' | 'video' | 'audio';
+  mediaUrl: string;
+  text?: string;
+  createdAt: string;
+};

@@ -23,10 +23,11 @@ import {
   SidebarInset,
   SidebarRail
 } from '@/components/ui/sidebar';
-import { Users, User, LogOut, HandHeart, Calendar } from 'lucide-react';
+import { Users, User, LogOut, HandHeart, Calendar, BookOpen } from 'lucide-react';
 import { getPastor } from '@/actions/users';
 import { useEffect, useState } from 'react';
 import type { User as UserType } from '@/lib/types';
+import { usePathname } from 'next/navigation';
 
 
 const UserMenu = ({ pastor }: { pastor: { name: string, email: string, imageUrl?: string }}) => (
@@ -75,6 +76,7 @@ const AppLogo = () => (
 
 export default function PastorDashboardLayout({ children }: { children: React.ReactNode }) {
   const [pastor, setPastor] = useState<UserType | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     async function fetchPastor() {
@@ -93,6 +95,14 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
     email: 'pastor@example.com',
     imageUrl: 'https://placehold.co/40x40.png'
   };
+  
+  const getPageTitle = () => {
+    if (pathname.includes('/members')) return 'Member Management';
+    if (pathname.includes('/teachings')) return 'Teachings';
+    if (pathname.includes('/contributions')) return 'Contributions';
+    if (pathname.includes('/ai-assistant')) return 'AI Assistant';
+    return `Welcome, Pastor ${pastorDetails.name.split(' ')[0]}`;
+  }
 
   return (
     <SidebarProvider defaultOpen={false}>
@@ -105,9 +115,15 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
           <SidebarContent className="p-2">
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/pastor/dashboard" tooltip="Events" isActive>
+                <SidebarMenuButton href="/pastor/dashboard" tooltip="Events" isActive={pathname === '/pastor/dashboard'}>
                   <Calendar />
                   <span>Events</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton href="/pastor/dashboard" tooltip="Teachings">
+                  <BookOpen />
+                  <span>Teachings</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
@@ -132,7 +148,7 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
           <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
             <SidebarTrigger />
             <div className="w-full flex-1">
-              <h1 className="font-semibold text-lg">Welcome, Pastor {pastorDetails.name.split(' ')[0]}</h1>
+              <h1 className="font-semibold text-lg">{getPageTitle()}</h1>
             </div>
             <UserMenu pastor={pastorDetails} />
           </header>
