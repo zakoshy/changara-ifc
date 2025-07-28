@@ -14,8 +14,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { CreditCard, DollarSign } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
 export function GiveDialog({ title, children }: { title: string, children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -64,19 +62,6 @@ export function GiveDialog({ title, children }: { title: string, children: React
                 className="pl-10"
               />
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Payment Method</Label>
-            <RadioGroup defaultValue="mpesa" className="flex gap-4">
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="mpesa" id="mpesa" />
-                    <Label htmlFor="mpesa" className="flex items-center gap-2 font-normal">M-Pesa</Label>
-                </div>
-                 <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="card" id="card" />
-                    <Label htmlFor="card" className="flex items-center gap-2 font-normal"><CreditCard className="w-4 h-4"/> Card</Label>
-                </div>
-            </RadioGroup>
           </div>
         </div>
         <DialogFooter>
