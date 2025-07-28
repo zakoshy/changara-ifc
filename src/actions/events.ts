@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -58,18 +59,16 @@ export async function createEvent(prevState: any, formData: FormData) {
       };
   }
 
-
   try {
     const client = await clientPromise;
     const db = client.db();
     
-    let eventCreated = false;
-    let teachingCreated = false;
-
-    // Create Event if data is present
+    const creationPromises = [];
+    
+    // Prepare Event creation if data is present
     if (isEventDataPresent) {
         const eventsCollection = db.collection('events');
-        await eventsCollection.insertOne({
+        const eventPromise = eventsCollection.insertOne({
             title,
             description,
             date,
@@ -77,10 +76,10 @@ export async function createEvent(prevState: any, formData: FormData) {
             location,
             imageUrl: 'https://placehold.co/600x400.png' // Placeholder image
         });
-        eventCreated = true;
+        creationPromises.push(eventPromise);
     }
 
-    // Create Teaching if data is present
+    // Prepare Teaching creation if data is present
     if (isTeachingDataPresent) {
         const teachingsCollection = db.collection('teachings');
         let mediaUrl = 'https://placehold.co/600x400.png';
@@ -90,24 +89,27 @@ export async function createEvent(prevState: any, formData: FormData) {
             mediaUrl = 'https://placehold.co/600x400.png/E8E8E8/000000?text=Audio';
         }
 
-        await teachingsCollection.insertOne({
+        const teachingPromise = teachingsCollection.insertOne({
           id: uuidv4(),
           text: teachingText,
           mediaType: teachingMediaType || 'photo',
           mediaUrl,
           createdAt: new Date().toISOString(),
         });
-        teachingCreated = true;
+        creationPromises.push(teachingPromise);
     }
+
+    // Execute all database operations in parallel
+    await Promise.all(creationPromises);
 
     revalidatePath('/pastor/dashboard');
     
     let successMessage = '';
-    if (eventCreated && teachingCreated) {
+    if (isEventDataPresent && isTeachingDataPresent) {
         successMessage = 'Event and Teaching created successfully!';
-    } else if (eventCreated) {
+    } else if (isEventDataPresent) {
         successMessage = 'Event created successfully!';
-    } else if (teachingCreated) {
+    } else if (isTeachingDataPresent) {
         successMessage = 'Teaching created successfully!';
     }
 
