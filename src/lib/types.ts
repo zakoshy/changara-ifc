@@ -42,3 +42,6 @@ export type Teaching = {
   text?: string;
   createdAt: string;
 };
+
+// Union type for the combined feed
+export type FeedItem = (Event & { type: 'event'; sortDate: Date }) | (Teaching & { type: 'teaching'; sortDate: Date });
