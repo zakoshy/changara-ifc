@@ -80,7 +80,7 @@ export function EventForm({ selectedDate, onFinished }: { selectedDate?: Date; o
       <div className="space-y-2">
         <Label htmlFor="teachingUrl">Teaching Materials (Optional)</Label>
         <Input id="teachingUrl" name="teachingUrl" type="file" />
-        <p className="text-xs text-muted-foreground">Upload a PDF or document file. This is a placeholder and does not currently upload a file.</p>
+        <p className="text-xs text-muted-foreground">Upload an audio, photo, or document file. This is a placeholder and does not currently upload a file.</p>
         {state.errors?.teachingUrl && <p className="text-sm font-medium text-destructive">{state.errors.teachingUrl[0]}</p>}
       </div>
 

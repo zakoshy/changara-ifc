@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import clientPromise from '@/lib/mongodb';
 import { Event } from '@/lib/types';
+import { ObjectId } from 'mongodb';
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Title is required.'),
@@ -11,7 +12,7 @@ const eventSchema = z.object({
   date: z.string().min(1, 'Date is required.'),
   time: z.string().min(1, 'Time is required.'),
   location: z.string().min(1, 'Location is required.'),
-  teachingUrl: z.string().url().optional().or(z.literal('')),
+  teachingUrl: z.any().optional(),
 });
 
 export async function createEvent(prevState: any, formData: FormData) {
@@ -29,13 +30,15 @@ export async function createEvent(prevState: any, formData: FormData) {
   try {
     const client = await clientPromise;
     const db = client.db();
-    const eventsCollection = db.collection<Omit<Event, 'id'>>('events');
+    const eventsCollection = db.collection('events');
     
     // TODO: Handle actual file upload for teaching material
     // For now, we are just saving the URL if provided
+    const { teachingUrl, ...eventData } = validatedFields.data;
     
     await eventsCollection.insertOne({
-      ...validatedFields.data,
+      ...eventData,
+      teachingUrl: teachingUrl ? '/placeholder.pdf' : undefined, // Placeholder for file path
       imageUrl: 'https://placehold.co/600x400.png' // Placeholder image
     });
 
@@ -58,15 +61,13 @@ export async function getEvents(): Promise<Event[]> {
     const client = await clientPromise;
     const db = client.db();
     const eventsCollection = db.collection('events');
-    const events = await eventsCollection.find({}).toArray();
+    const events = await eventsCollection.find({}).sort({ date: 1 }).toArray();
 
-    return events.map(event => {
-      const { _id, ...rest } = event;
-      return {
-        ...rest,
-        id: _id.toString(),
-      }
-    }) as Event[];
+    return events.map(event => ({
+      ...event,
+      _id: undefined, // remove non-serializable object
+      id: (event._id as ObjectId).toString(),
+    })) as Event[];
 
   } catch (error) {
     console.error("Failed to fetch events:", error);
