@@ -1,25 +1,49 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useFormState, useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { signup } from '@/actions/auth';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+const initialState = {
+  message: null,
+  errors: {},
+  success: false,
+};
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" className="w-full" aria-disabled={pending}>
+      {pending ? 'Creating Account...' : 'Create Account'}
+    </Button>
+  );
+}
 
 export default function SignupPage() {
   const router = useRouter();
+  const { toast } = useToast();
+  const [state, formAction] = useFormState(signup, initialState);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    // In a real app, you'd handle user creation here
-    // For this scaffold, we'll just redirect to the login page
-    router.push('/login');
-  };
-  
+  useEffect(() => {
+    if (state.success && state.message) {
+      toast({
+        title: 'Success!',
+        description: state.message,
+      });
+      router.push('/login');
+    }
+  }, [state.success, state.message, router, toast]);
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -27,7 +51,7 @@ export default function SignupPage() {
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-muted/40 p-4">
       <div className="w-full max-w-md">
-        <form onSubmit={handleSubmit}>
+        <form action={formAction}>
           <Card className="rounded-xl shadow-2xl">
             <CardHeader className="text-center">
               <Link href="/" className="inline-block mx-auto mb-4">
@@ -39,23 +63,33 @@ export default function SignupPage() {
               <CardDescription>Join our community by creating your account below.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {state.message && !state.success && (
+                <Alert variant="destructive">
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{state.message}</AlertDescription>
+                </Alert>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
-                <Input id="name" placeholder="John Doe" required />
+                <Input id="name" name="name" placeholder="John Doe" required />
+                {state.errors?.name && <p className="text-sm font-medium text-destructive">{state.errors.name[0]}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" required />
+                <Input id="email" name="email" type="email" placeholder="m@example.com" required />
+                 {state.errors?.email && <p className="text-sm font-medium text-destructive">{state.errors.email[0]}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" type="tel" placeholder="+254 712 345678" required />
+                <Input id="phone" name="phone" type="tel" placeholder="+254 712 345678" required />
+                 {state.errors?.phone && <p className="text-sm font-medium text-destructive">{state.errors.phone[0]}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
+                    name="password"
                     type={showPassword ? 'text' : 'password'}
                     required
                   />
@@ -69,10 +103,9 @@ export default function SignupPage() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
+                 {state.errors?.password && <p className="text-sm font-medium text-destructive">{state.errors.password[0]}</p>}
               </div>
-              <Button type="submit" className="w-full">
-                Create Account
-              </Button>
+              <SubmitButton />
               <div className="mt-4 text-center text-sm">
                 Already have an account?{' '}
                 <Link href="/login" className="underline font-medium text-primary">
@@ -86,3 +119,5 @@ export default function SignupPage() {
     </div>
   );
 }
+
+    
