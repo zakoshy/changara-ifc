@@ -53,7 +53,9 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
           description: result.message,
         });
         setIsOpen(false);
-        // We might need to trigger a refresh of the user data here in a real app
+        // In a real app, you would likely need to trigger a page refresh 
+        // or re-fetch user data to see the change immediately.
+        window.location.reload();
       } else {
         toast({
           variant: 'destructive',
@@ -104,7 +106,7 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
                 </p>
             </div>
              <Button variant="outline" asChild>
-                <Link href="/reset-password">
+                <Link href="/forgot-password?token=dummytokentoavoiderror">
                     <KeyRound className="mr-2 h-4 w-4"/>
                     Reset Password
                 </Link>

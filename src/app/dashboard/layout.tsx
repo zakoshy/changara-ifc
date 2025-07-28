@@ -70,7 +70,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     async function fetchUser() {
-      const userData = await getUserById('mock-user-id'); // ID is unused in the mock
+      // In a real app, you would get the user ID from the session.
+      // For this demo, we pass a placeholder which the action handles.
+      const userData = await getUserById('no-id'); 
       setUser(userData);
     }
     fetchUser();
@@ -78,14 +80,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!user) {
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <p>Loading...</p>
+        <div className="flex items-center justify-center min-h-screen bg-background">
+             <div className="flex items-center gap-2 text-lg font-semibold text-muted-foreground">
+                <svg className="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24"></svg>
+                Loading...
+            </div>
         </div>
     );
   }
 
   return (
-      <div className="min-h-screen w-full flex flex-col">
+      <div className="min-h-screen w-full flex flex-col bg-muted/40">
           <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
             <AppLogo />
             <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
@@ -103,7 +108,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {user && <UserMenu user={user} />}
             </div>
           </header>
-          <main className="p-4 sm:px-6">
+          <main className="flex-1 p-4 sm:px-6">
             <div className="mx-auto max-w-7xl w-full">
                 {children}
             </div>

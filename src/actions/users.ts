@@ -80,29 +80,37 @@ export async function updateUserProfilePicture(userId: string, imageUrl: string)
 }
 
 export async function getUserById(userId: string): Promise<User | null> {
-  // In a real app, you'd have session management to get the currently logged-in user.
-  // For this demo, we'll find the first 'member' user.
+  // This is a simplified fetch for the demo. In a real app, you would
+  // get the current user from the session.
   try {
     const client = await clientPromise;
     const db = client.db();
     const usersCollection = db.collection('users');
     
-    // In a real app, you'd use the userId passed in. For now, we get the first member.
-    const user = await usersCollection.findOne({ role: 'member' });
+    let user;
+    // If a valid ID is passed, try to find that user.
+    if (ObjectId.isValid(userId)) {
+        user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    }
+
+    // If no user found with ID, or if ID was invalid, find the first 'member'.
+    if (!user) {
+        user = await usersCollection.findOne({ role: 'member' });
+    }
 
     if (user) {
         return {
         ...user,
         id: (user._id as ObjectId).toString(),
-        _id: undefined, // remove non-serializable object
+        _id: undefined, 
         phone: user.phone || 'N/A',
-        imageUrl: user.imageUrl || `https://placehold.co/40x40.png?text=${user.name.charAt(0)}`
+        imageUrl: user.imageUrl || `https://placehold.co/128x128.png?text=${user.name.charAt(0)}`
         } as User;
     }
 
     // Fallback for when no member user is in the DB, to prevent the app from crashing.
     return {
-        id: 'fallback-user-id', // This ID is not a valid ObjectId, which is handled.
+        id: 'fallback-user-id', // This ID is not a valid ObjectId, handled in update action.
         name: 'Member User',
         email: 'member@example.com',
         phone: '555-555-5555',
