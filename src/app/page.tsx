@@ -43,41 +43,31 @@ export default function LandingPage() {
     <div className="flex flex-col min-h-screen">
       <LandingHeader />
       <main className="flex-1">
-        <section className="relative py-20 md:py-32">
-            <div 
-              aria-hidden="true" 
-              className="absolute inset-0 top-0 w-full h-full bg-background"
-              style={{
-                backgroundImage: 'radial-gradient(circle at top, hsl(var(--primary) / 0.1), transparent 40%)',
-              }}
-            ></div>
-          <div className="container relative text-center">
+        <section className="relative h-[60vh] flex items-center justify-center text-white">
+          <Image
+            src="https://images.pexels.com/photos/5199797/pexels-photo-5199797.jpeg"
+            alt="Church bible"
+            layout="fill"
+            objectFit="cover"
+            className="absolute inset-0 z-0"
+            data-ai-hint="church community"
+          />
+          <div className="absolute inset-0 bg-black/50 z-10"></div>
+          <div className="container relative z-20 text-center">
             <div className="mx-auto max-w-3xl">
-              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl font-headline">
+              <h1 className="text-4xl font-bold tracking-tight sm:text-6xl font-headline">
                 Welcome to IFC changara
               </h1>
-              <p className="mt-6 text-lg leading-8 text-muted-foreground">
+              <p className="mt-6 text-lg leading-8 text-neutral-200">
                 Stay connected with our church community. Access event schedules, give online, and receive important updates, all in one place.
               </p>
               <div className="mt-10 flex items-center justify-center gap-x-6">
                 <Button size="lg" asChild>
                   <Link href="/signup">Get Started</Link>
                 </Button>
-                <Button size="lg" variant="ghost" asChild>
+                <Button size="lg" variant="secondary" asChild>
                   <Link href="/pastor/login">Pastor's Area <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
-              </div>
-            </div>
-            <div className="mt-16 flow-root sm:mt-24">
-              <div className="-m-2 rounded-xl bg-muted/20 p-2 ring-1 ring-inset ring-primary/10 lg:-m-4 lg:rounded-2xl lg:p-4">
-                <Image
-                  src="https://images.pexels.com/photos/5199797/pexels-photo-5199797.jpeg"
-                  alt="App screenshot"
-                  width={1200}
-                  height={600}
-                  data-ai-hint="church community"
-                  className="rounded-md shadow-2xl ring-1 ring-foreground/10"
-                />
               </div>
             </div>
           </div>
