@@ -10,11 +10,12 @@ export type User = {
   password?: string;
   resetToken?: string;
   resetTokenExpiry?: Date;
+  imageUrl?: string;
 };
 
 export type Event = {
   _id?: ObjectId;
-  id?: string; // from placeholder
+  id: string; // from placeholder
   title: string;
   date: string;
   time: string;

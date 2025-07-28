@@ -5,6 +5,7 @@ import type { User } from '@/lib/types';
 import { CellAction } from './cell-action';
 import { Badge } from '../ui/badge';
 import { Checkbox } from '../ui/checkbox';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -31,6 +32,18 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'name',
     header: 'Name',
+    cell: ({ row }) => {
+      const user = row.original;
+      return (
+        <div className="flex items-center gap-3">
+          <Avatar className="h-8 w-8">
+             <AvatarImage src={user.imageUrl} alt={user.name} />
+             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <span className="font-medium">{user.name}</span>
+        </div>
+      );
+    }
   },
   {
     accessorKey: 'email',

@@ -8,8 +8,9 @@ import { EventCalendar } from '@/components/pastor/event-calendar';
 import { getEvents } from '@/actions/events';
 
 export default async function PastorDashboardPage() {
-  const members = placeholderUsers; // In a real app, fetch from DB
-  const contributions = placeholderContributions; // In a real app, fetch from DB
+  // In a real app, fetch from DB
+  const members = [...placeholderUsers].sort((a, b) => a.name.localeCompare(b.name)); 
+  const contributions = placeholderContributions; 
   const events = await getEvents();
 
   return (

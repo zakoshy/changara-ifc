@@ -1,14 +1,14 @@
 import type { User, Event, Contribution } from './types';
 
 export const placeholderUsers: User[] = [
-  { id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'member', joinedAt: '2023-01-15' },
-  { id: '2', name: 'Bob Williams', email: 'bob@example.com', role: 'member', joinedAt: '2023-02-20' },
-  { id: '3', name: 'Charlie Brown', email: 'charlie@example.com', role: 'member', joinedAt: '2023-03-10' },
-  { id: '4', name: 'Diana Miller', email: 'diana@example.com', role: 'member', joinedAt: '2023-04-05' },
-  { id: '5', name: 'Ethan Davis', email: 'ethan@example.com', role: 'member', joinedAt: '2023-05-21' },
-  { id: '6', name: 'Fiona Garcia', email: 'fiona@example.com', role: 'member', joinedAt: '2023-06-11' },
-  { id: '7', name: 'George Rodriguez', email: 'george@example.com', role: 'member', joinedAt: '2023-07-19' },
-  { id: '8', name: 'Hannah Martinez', email: 'hannah@example.com', role: 'member', joinedAt: '2023-08-01' },
+  { id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'member', joinedAt: '2023-01-15', imageUrl: 'https://placehold.co/40x40.png' },
+  { id: '2', name: 'Bob Williams', email: 'bob@example.com', role: 'member', joinedAt: '2023-02-20', imageUrl: 'https://placehold.co/40x40.png' },
+  { id: '3', name: 'Charlie Brown', email: 'charlie@example.com', role: 'member', joinedAt: '2023-03-10', imageUrl: 'https://placehold.co/40x40.png' },
+  { id: '4', name: 'Diana Miller', email: 'diana@example.com', role: 'member', joinedAt: '2023-04-05', imageUrl: 'https://placehold.co/40x40.png' },
+  { id: '5', name: 'Ethan Davis', email: 'ethan@example.com', role: 'member', joinedAt: '2023-05-21', imageUrl: 'https://placehold.co/40x40.png' },
+  { id: '6', name: 'Fiona Garcia', email: 'fiona@example.com', role: 'member', joinedAt: '2023-06-11', imageUrl: 'https://placehold.co/40x40.png' },
+  { id: '7', name: 'George Rodriguez', email: 'george@example.com', role: 'member', joinedAt: '2023-07-19', imageUrl: 'https://placehold.co/40x40.png' },
+  { id: '8', name: 'Hannah Martinez', email: 'hannah@example.com', role: 'member', joinedAt: '2023-08-01', imageUrl: 'https://placehold.co/40x40.png' },
 ];
 
 export const placeholderEvents: Event[] = [
