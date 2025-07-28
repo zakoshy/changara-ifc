@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useTransition } from 'react';
@@ -32,6 +33,7 @@ import { createTeaching, deleteTeaching } from '@/actions/teachings';
 import { useToast } from '@/hooks/use-toast';
 import { Teaching } from '@/lib/types';
 import { format } from 'date-fns';
+import { Input } from '@/components/ui/input';
 
 const initialState = {
   message: null,
