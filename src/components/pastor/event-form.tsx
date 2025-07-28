@@ -75,8 +75,8 @@ export function EventForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" placeholder="Briefly describe the event." defaultValue={event?.description}/>
+        <Label htmlFor="description">Description / Teaching Notes</Label>
+        <Textarea id="description" name="description" placeholder="Briefly describe the event or add teaching notes here." defaultValue={event?.description}/>
         {state.errors?.description && <p className="text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
       </div>
 

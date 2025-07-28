@@ -5,17 +5,14 @@ import { EventCalendar } from '@/components/pastor/event-calendar';
 import { getEvents } from '@/actions/events';
 import { getUsers } from '@/actions/users';
 import { getContributions } from '@/actions/contributions';
-import { getTeachings } from '@/actions/teachings';
 import { columns as memberColumns } from '@/components/pastor/columns';
 import { columns as contributionColumns } from '@/components/pastor/contribution-columns';
-import { TeachingsManager } from '@/components/pastor/teachings-manager';
 
 
 export default async function PastorDashboardPage() {
   const allUsers = await getUsers();
   const contributions = await getContributions();
   const allEvents = await getEvents();
-  const teachings = await getTeachings();
   
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -36,9 +33,8 @@ export default async function PastorDashboardPage() {
   return (
     <div className="py-6">
       <Tabs defaultValue="events">
-        <TabsList className="mb-6 grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+        <TabsList className="mb-6 grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
           <TabsTrigger value="events">Events</TabsTrigger>
-          <TabsTrigger value="teachings">Teachings</TabsTrigger>
           <TabsTrigger value="members">Members</TabsTrigger>
           <TabsTrigger value="contributions">Contributions</TabsTrigger>
           <TabsTrigger value="ai-assistant">AI Assistant</TabsTrigger>
@@ -46,10 +42,6 @@ export default async function PastorDashboardPage() {
 
         <TabsContent value="events">
             <EventCalendar events={upcomingEvents} />
-        </TabsContent>
-
-        <TabsContent value="teachings">
-          <TeachingsManager teachings={teachings} />
         </TabsContent>
 
         <TabsContent value="members">
