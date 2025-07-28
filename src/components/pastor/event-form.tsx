@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useState, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import { createEvent, updateEvent } from '@/actions/events';
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,17 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { LoaderCircle, ImageIcon, Video, Mic } from 'lucide-react';
+import { LoaderCircle, Plus, FileImage, Video, Mic } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Event } from '@/lib/types';
 import { Card, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 const initialState = {
   message: null,
@@ -41,6 +48,7 @@ export function EventForm({
     event?: Event | null;
 }) {
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const isEditing = !!event;
   // Use updateEvent if editing, otherwise use the combined createEvent
@@ -59,6 +67,11 @@ export function EventForm({
   }, [state, toast, onFinished, isEditing]);
 
   const dateValue = event?.date || (selectedDate ? format(selectedDate, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx") : '');
+  
+  const handleMediaSelect = (type: 'photo' | 'video' | 'audio') => {
+    setTeachingMediaType(type);
+    fileInputRef.current?.click();
+  }
 
   return (
     <form action={formAction} className="space-y-6">
@@ -112,21 +125,35 @@ export function EventForm({
             <CardDescription>This section is optional. Use it to post standalone teachings.</CardDescription>
           </CardHeader>
           <input type="hidden" name="teachingMediaType" value={teachingMediaType} />
+          <Input id="teachingMediaUrl" name="teachingMediaUrl" type="file" ref={fileInputRef} className="hidden"/>
 
           <div className="space-y-2">
             <Label htmlFor="teachingText">Teaching Notes</Label>
-            <Textarea id="teachingText" name="teachingText" placeholder="Type your sermon notes or teaching points here..." rows={5}/>
-          </div>
-          
-          <div className="space-y-2">
-            <Label>Attach Media (optional)</Label>
-            <div className="flex gap-2">
-                 <Button type="button" variant={teachingMediaType === 'photo' ? 'secondary' : 'outline'} onClick={() => setTeachingMediaType('photo')}><ImageIcon className="mr-2 h-4 w-4"/>Photo</Button>
-                 <Button type="button" variant={teachingMediaType === 'video' ? 'secondary' : 'outline'} onClick={() => setTeachingMediaType('video')}><Video className="mr-2 h-4 w-4"/>Video</Button>
-                 <Button type="button" variant={teachingMediaType === 'audio' ? 'secondary' : 'outline'} onClick={() => setTeachingMediaType('audio')}><Mic className="mr-2 h-4 w-4"/>Audio</Button>
+            <div className="relative">
+                <Textarea id="teachingText" name="teachingText" placeholder="Type your sermon notes or teaching points here..." rows={5} className="pl-12"/>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="absolute bottom-2 left-2 h-8 w-8">
+                            <Plus className="h-4 w-4"/>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem onSelect={() => handleMediaSelect('photo')}>
+                            <FileImage className="mr-2 h-4 w-4"/>
+                            <span>Photo</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleMediaSelect('video')}>
+                             <Video className="mr-2 h-4 w-4"/>
+                             <span>Video</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleMediaSelect('audio')}>
+                             <Mic className="mr-2 h-4 w-4"/>
+                             <span>Audio</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
-            <Input id="teachingMediaUrl" name="teachingMediaUrl" type="file" className="mt-2"/>
-            <p className="text-xs text-muted-foreground">This is a placeholder and does not currently upload a file.</p>
+            <p className="text-xs text-muted-foreground">Click the plus icon to attach media. This is a placeholder and does not currently upload a file.</p>
           </div>
        </div>
 
