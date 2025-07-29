@@ -79,12 +79,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
 
   useEffect(() => {
+    // This function runs on the client after the component mounts
     async function fetchUser() {
-      // For this prototype, we'll get the email from localStorage.
       const userEmail = localStorage.getItem('currentUserEmail');
       if (!userEmail) {
-        // If no user email is found, they are not logged in.
-        // Redirect them to the login page.
         router.push('/login');
         return;
       }
@@ -93,8 +91,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (userData) {
         setUser(userData);
       } else {
-        // Handle case where user data can't be fetched (e.g., stale email)
-        // Clear local storage and redirect to login
         localStorage.removeItem('currentUserEmail');
         router.push('/login');
       }

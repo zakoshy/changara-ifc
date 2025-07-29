@@ -1,32 +1,48 @@
 
+'use client';
+
+import { useState, useEffect } from 'react';
 import { getEvents } from '@/actions/events';
 import { FeedCard } from '@/components/dashboard/feed-card';
 import { User, Event, FeedItem } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default async function DashboardPage({ user }: { user: User }) {
-  const allEvents = await getEvents();
+export default function DashboardPage({ user }: { user: User }) {
+  const [upcomingEvents, setUpcomingEvents] = useState<FeedItem[]>([]);
+  const [loading, setLoading] = useState(true);
   
   // The user is now passed as a prop from the layout
   if (!user) {
-    // This can be a loading state or a fallback
-    return <div>Loading...</div>;
+    // This can be a loading state or a fallback, though the layout should prevent this.
+    return <div>Loading user data...</div>;
   }
+  
+  useEffect(() => {
+    async function loadEvents() {
+        setLoading(true);
+        const allEvents = await getEvents();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Set to the beginning of the day
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Set to the beginning of the day
+        const filteredEvents = allEvents
+            .filter((event) => {
+            try {
+                const eventDate = new Date(event.date);
+                return eventDate >= today;
+            } catch (e) {
+                return false;
+            }
+            })
+            .map((item) => ({ ...item, type: 'event', sortDate: new Date(item.date) }))
+            .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime()) as FeedItem[];
+        
+        setUpcomingEvents(filteredEvents);
+        setLoading(false);
+    }
 
-  const upcomingEvents = allEvents
-    .filter((event) => {
-      try {
-        const eventDate = new Date(event.date);
-        return eventDate >= today;
-      } catch (e) {
-        return false;
-      }
-    })
-    .map((item) => ({ ...item, type: 'event', sortDate: new Date(item.date) }))
-    .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime()) as FeedItem[];
+    loadEvents();
+  }, [])
 
 
   return (
@@ -48,7 +64,13 @@ export default async function DashboardPage({ user }: { user: User }) {
         <h2 className="text-2xl font-bold tracking-tight font-headline mb-4">
           Upcoming Events
         </h2>
-        {upcomingEvents.length > 0 ? (
+        {loading ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <Skeleton className="h-[200px] w-full" />
+                <Skeleton className="h-[200px] w-full" />
+                <Skeleton className="h-[200px] w-full" />
+            </div>
+        ) : upcomingEvents.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {upcomingEvents.map((item) => (
               <FeedCard key={`${item.type}-${item.id}`} item={item} user={user} />
@@ -66,3 +88,4 @@ export default async function DashboardPage({ user }: { user: User }) {
     </div>
   );
 }
+
