@@ -52,7 +52,7 @@ export async function getPastor(): Promise<User | null> {
     }
   }
 
-export async function updateUserProfilePicture(userId: string, imageUrl: string) {
+export async function updateUserProfilePicture(userId: string, imageUrl: string | null) {
   try {
     if (!ObjectId.isValid(userId)) {
         return { error: 'Invalid user ID. Cannot update picture for a fallback user.' };
@@ -61,13 +61,17 @@ export async function updateUserProfilePicture(userId: string, imageUrl: string)
     const client = await clientPromise;
     const db = client.db();
     const usersCollection = db.collection('users');
+    
+    const updateOperation = imageUrl
+      ? { $set: { imageUrl: imageUrl } }
+      : { $unset: { imageUrl: "" } };
 
     const result = await usersCollection.updateOne(
       { _id: new ObjectId(userId) },
-      { $set: { imageUrl: imageUrl } }
+      updateOperation
     );
 
-    if (result.modifiedCount === 0) {
+    if (result.modifiedCount === 0 && result.matchedCount === 0) {
         return { error: 'Could not find the user to update.' };
     }
     

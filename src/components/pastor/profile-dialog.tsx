@@ -13,14 +13,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { User } from '@/lib/types';
 import { updateUserProfilePicture } from '@/actions/users';
-import { LoaderCircle, Mail, User as UserIcon, Phone, KeyRound, Camera } from 'lucide-react';
+import { LoaderCircle, Mail, User as UserIcon, Phone, KeyRound, Camera, Trash2, GalleryVertical } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Separator } from '../ui/separator';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../ui/dropdown-menu';
 
 function ProfileInfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
@@ -68,17 +67,19 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
       return;
     }
     startTransition(async () => {
-      // In a real app, this would upload the file and get a URL.
-      // Here we simulate it with a new placeholder URL based on the file preview.
-      const newImageUrl = previewUrl; // Use the preview URL directly
-      const result = await updateUserProfilePicture(user.id, newImageUrl!);
+      const newImageUrl = previewUrl; 
+      if (!newImageUrl) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not process the image.' });
+        return;
+      }
+      const result = await updateUserProfilePicture(user.id, newImageUrl);
 
       if (result.success) {
         toast({
           title: 'Success!',
           description: result.message,
         });
-        window.location.reload(); // Reload to show changes everywhere
+        window.location.reload(); 
       } else {
         toast({
           variant: 'destructive',
@@ -88,6 +89,25 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
       }
     });
   };
+
+  const handleRemovePicture = () => {
+     startTransition(async () => {
+      const result = await updateUserProfilePicture(user.id, null);
+      if (result.success) {
+        toast({
+          title: 'Success!',
+          description: 'Profile picture removed.',
+        });
+        window.location.reload();
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: result.error,
+        });
+      }
+    });
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -101,26 +121,52 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
           <div className="flex flex-col items-center gap-4">
              <div className="relative">
                 <Avatar className="h-32 w-32 border-2 border-primary/10">
-                    <AvatarImage src={previewUrl || user.imageUrl} alt={user.name} />
+                    <AvatarImage src={previewUrl || undefined} alt={user.name} />
                     <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="absolute bottom-1 right-1 h-8 w-8 rounded-full bg-background"
-                    onClick={handleCameraClick}
-                >
-                    <Camera className="h-4 w-4" />
-                    <span className="sr-only">Change profile picture</span>
-                </Button>
+                
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
+                  accept="image/*"
+                />
+
+                {previewUrl && !previewUrl.includes('placehold') ? (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className="absolute bottom-1 right-1 h-8 w-8 rounded-full bg-background"
+                            >
+                                <Camera className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onSelect={handleCameraClick}>
+                                <GalleryVertical className="mr-2 h-4 w-4"/>
+                                <span>Select from gallery</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={handleRemovePicture} className="text-destructive focus:text-destructive">
+                                <Trash2 className="mr-2 h-4 w-4"/>
+                                <span>Remove picture</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ) : (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="absolute bottom-1 right-1 h-8 rounded-full"
+                        onClick={handleCameraClick}
+                    >
+                        <Camera className="h-4 w-4 mr-1" />
+                        Update
+                    </Button>
+                )}
             </div>
-             <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              className="hidden"
-              accept="image/*"
-            />
             <div className="space-y-1 text-center">
               <p className="text-xl font-semibold">{user.name}</p>
               <p className="text-sm text-muted-foreground">{user.email}</p>
