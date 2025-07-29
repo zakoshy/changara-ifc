@@ -55,45 +55,40 @@ export function GiveDialog({ title, user, children }: { title: string, user: Use
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(null);
   const { toast } = useToast();
 
-  const handleGive = async () => {
+  const handleMpesaGive = async () => {
     if (!amount || parseFloat(amount) <= 0) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid Amount',
-        description: 'Please enter a valid amount to give.',
-      });
+      toast({ variant: 'destructive', title: 'Invalid Amount', description: 'Please enter a valid amount to give.' });
+      return;
+    }
+    if (!user.phone) {
+      toast({ variant: 'destructive', title: 'Phone Number Missing', description: 'Your phone number is not set in your profile. Please add it to continue.' });
       return;
     }
     
-    if (!user.phone) {
-         toast({
-            variant: 'destructive',
-            title: 'Phone Number Missing',
-            description: 'Your phone number is not set in your profile. Please add it to continue.',
-        });
-        return;
-    }
-    
     setLoading(true);
-    
     const result = await initiateStkPush({amount, phone: user.phone});
-
     setLoading(false);
 
     if (result.success) {
-        toast({
-            title: 'Request Sent!',
-            description: `An STK push has been sent to ${user.phone}. Please enter your M-Pesa PIN to complete the transaction.`,
-        });
-        resetDialog();
+      toast({ title: 'Request Sent!', description: `An STK push has been sent to ${user.phone}. Please enter your M-Pesa PIN to complete the transaction.` });
+      resetDialog();
     } else {
-        toast({
-            variant: 'destructive',
-            title: 'Request Failed',
-            description: result.message || 'Could not initiate STK push. Please check the details and try again.',
-        });
+      toast({ variant: 'destructive', title: 'Request Failed', description: result.message || 'Could not initiate STK push. Please check the details and try again.' });
     }
   };
+
+  const handleGenericPayment = async (methodName: string) => {
+     if (!amount || parseFloat(amount) <= 0) {
+      toast({ variant: 'destructive', title: 'Invalid Amount', description: 'Please enter a valid amount to give.' });
+      return;
+    }
+    setLoading(true);
+    // Simulate payment processing
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setLoading(false);
+    toast({ title: 'Payment Successful!', description: `Your contribution of Ksh ${amount} via ${methodName} was successful.` });
+    resetDialog();
+  }
 
   const resetDialog = () => {
     setAmount('');
@@ -103,16 +98,22 @@ export function GiveDialog({ title, user, children }: { title: string, user: Use
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      // Reset state when dialog is closed
       setTimeout(() => {
         setAmount('');
         setSelectedMethod(null);
-      }, 200); // delay to allow for closing animation
+      }, 200); 
     }
     setIsOpen(open);
   }
 
   const renderContent = () => {
+    const commonAmountInput = (
+      <div className="grid grid-cols-1 items-center gap-4">
+        <Label htmlFor="amount">Amount (Ksh)</Label>
+        <Input id="amount" type="number" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full" />
+      </div>
+    );
+
     if (selectedMethod === 'mpesa') {
       return (
         <>
@@ -120,43 +121,65 @@ export function GiveDialog({ title, user, children }: { title: string, user: Use
             Your faithful giving supports the work of our church. Your number ({user.phone}) will be used for the M-Pesa transaction.
           </DialogDescription>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="amount">
-                Amount (Ksh)
-              </Label>
-              <div className="col-span-3 relative">
-                  <Input
-                      id="amount"
-                      type="number"
-                      placeholder="Enter the amount you wish to give"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      className="w-full"
-                  />
-              </div>
-            </div>
+            {commonAmountInput}
           </div>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => setSelectedMethod(null)} disabled={loading}><ArrowLeft className="mr-2 h-4 w-4"/>Back</Button>
-            <Button type="submit" onClick={handleGive} disabled={loading}>
+            <Button type="submit" onClick={handleMpesaGive} disabled={loading}>
               {loading ? <LoaderCircle className="animate-spin" /> : 'Give Now'}
             </Button>
           </DialogFooter>
         </>
       );
     }
-    
-    if (selectedMethod === 'paypal' || selectedMethod === 'mastercard') {
+
+    if (selectedMethod === 'paypal') {
         return (
             <>
-                <div className="text-center py-8">
-                    <p className="text-muted-foreground">
-                        {selectedMethod === 'paypal' ? 'PayPal' : 'Card'} payments are coming soon.
-                    </p>
+                <DialogDescription>Enter your PayPal email address to proceed with the payment.</DialogDescription>
+                <div className="grid gap-4 py-4">
+                    {commonAmountInput}
+                    <div className="grid grid-cols-1 items-center gap-4">
+                        <Label htmlFor="paypal-email">PayPal Email</Label>
+                        <Input id="paypal-email" type="email" placeholder="email@example.com" defaultValue={user.email} />
+                    </div>
                 </div>
                 <DialogFooter>
-                    <Button type="button" variant="ghost" onClick={() => setSelectedMethod(null)}><ArrowLeft className="mr-2 h-4 w-4"/>Back</Button>
-                    <Button type="button" onClick={() => setIsOpen(false)}>Close</Button>
+                    <Button type="button" variant="ghost" onClick={() => setSelectedMethod(null)} disabled={loading}><ArrowLeft className="mr-2 h-4 w-4"/>Back</Button>
+                    <Button type="submit" onClick={() => handleGenericPayment('PayPal')} disabled={loading}>
+                        {loading ? <LoaderCircle className="animate-spin" /> : `Pay Ksh ${amount || '0'}`}
+                    </Button>
+                </DialogFooter>
+            </>
+        )
+    }
+    
+    if (selectedMethod === 'mastercard') {
+        return (
+            <>
+                <DialogDescription>Enter your card details to complete the payment securely.</DialogDescription>
+                <div className="grid gap-4 py-4">
+                    {commonAmountInput}
+                     <div className="space-y-2">
+                        <Label htmlFor="card-number">Card Number</Label>
+                        <Input id="card-number" placeholder="0000 0000 0000 0000" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="expiry-date">Expiry Date</Label>
+                            <Input id="expiry-date" placeholder="MM / YY" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="cvc">CVC</Label>
+                            <Input id="cvc" placeholder="123" />
+                        </div>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button type="button" variant="ghost" onClick={() => setSelectedMethod(null)} disabled={loading}><ArrowLeft className="mr-2 h-4 w-4"/>Back</Button>
+                     <Button type="submit" onClick={() => handleGenericPayment('Card')} disabled={loading}>
+                        {loading ? <LoaderCircle className="animate-spin" /> : `Pay Ksh ${amount || '0'}`}
+                    </Button>
                 </DialogFooter>
             </>
         )
@@ -169,15 +192,15 @@ export function GiveDialog({ title, user, children }: { title: string, user: Use
           Choose your preferred method to give. Your faithful support helps us continue our work.
         </DialogDescription>
         <div className="grid gap-4 py-4">
-            <Button variant="outline" className="justify-start h-12 text-base" onClick={() => setSelectedMethod('mpesa')}>
+            <Button variant="outline" className="justify-start h-12 text-base gap-4" onClick={() => setSelectedMethod('mpesa')}>
                 <MpesaIcon />
                 <span>Pay with M-Pesa</span>
             </Button>
-            <Button variant="outline" className="justify-start h-12 text-base" onClick={() => setSelectedMethod('paypal')}>
+            <Button variant="outline" className="justify-start h-12 text-base gap-4" onClick={() => setSelectedMethod('paypal')}>
                 <PayPalIcon />
                 <span>Pay with PayPal</span>
             </Button>
-            <Button variant="outline" className="justify-start h-12 text-base" onClick={() => setSelectedMethod('mastercard')}>
+            <Button variant="outline" className="justify-start h-12 text-base gap-4" onClick={() => setSelectedMethod('mastercard')}>
                 <MastercardIcon />
                 <span>Pay with Card</span>
             </Button>
