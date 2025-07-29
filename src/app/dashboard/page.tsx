@@ -1,60 +1,26 @@
 
-'use client';
-
-import { useState, useEffect } from 'react';
 import { getEvents } from '@/actions/events';
 import { FeedCard } from '@/components/dashboard/feed-card';
 import { User, Event, FeedItem } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
 
-export default function DashboardPage({ user }: { user: User }) {
-  const [upcomingEvents, setUpcomingEvents] = useState<FeedItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    async function loadEvents() {
-        setLoading(true);
-        const allEvents = await getEvents();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Set to the beginning of the day
+export default async function DashboardPage({ user }: { user: User }) {
+  // Fetch events on the server
+  const allEvents = await getEvents();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to the beginning of the day
 
-        const filteredEvents = allEvents
-            .filter((event) => {
-            try {
-                const eventDate = new Date(event.date);
-                return eventDate >= today;
-            } catch (e) {
-                return false;
-            }
-            })
-            .map((item) => ({ ...item, type: 'event', sortDate: new Date(item.date) }))
-            .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime()) as FeedItem[];
-        
-        setUpcomingEvents(filteredEvents);
-        setLoading(false);
-    }
-
-    if (user) {
-        loadEvents();
-    }
-  }, [user]);
-
-  // The layout will now handle the main loading state, but we add a safeguard here.
-  if (!user) {
-    return (
-        <div className="flex items-center justify-center min-h-[50vh]">
-             <div className="flex items-center gap-2 text-lg font-semibold text-muted-foreground">
-                <svg className="animate-spin h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Loading dashboard...
-            </div>
-        </div>
-    );
-  }
-
+  const upcomingEvents = allEvents
+      .filter((event) => {
+      try {
+          const eventDate = new Date(event.date);
+          return eventDate >= today;
+      } catch (e) {
+          return false;
+      }
+      })
+      .map((item) => ({ ...item, type: 'event', sortDate: new Date(item.date) }))
+      .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime()) as FeedItem[];
 
   return (
     <div className="flex flex-col gap-8 py-6">
@@ -75,13 +41,7 @@ export default function DashboardPage({ user }: { user: User }) {
         <h2 className="text-2xl font-bold tracking-tight font-headline mb-4">
           Upcoming Events
         </h2>
-        {loading ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Skeleton className="h-[200px] w-full" />
-                <Skeleton className="h-[200px] w-full" />
-                <Skeleton className="h-[200px] w-full" />
-            </div>
-        ) : upcomingEvents.length > 0 ? (
+        {upcomingEvents.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {upcomingEvents.map((item) => (
               <FeedCard key={`${item.type}-${item.id}`} item={item} user={user} />

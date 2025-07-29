@@ -87,10 +87,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         return;
       }
 
-      const userData = await getUserById(userEmail); 
-      if (userData) {
-        setUser(userData);
-      } else {
+      try {
+        const userData = await getUserById(userEmail); 
+        if (userData) {
+          setUser(userData);
+        } else {
+          // If no user is found, the session is invalid.
+          localStorage.removeItem('currentUserEmail');
+          router.push('/login');
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data, redirecting to login.", error);
         localStorage.removeItem('currentUserEmail');
         router.push('/login');
       }
