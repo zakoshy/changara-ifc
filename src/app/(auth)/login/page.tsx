@@ -17,6 +17,7 @@ const initialState = {
   message: null,
   errors: {},
   success: false,
+  role: null,
 };
 
 function SubmitButton() {
@@ -40,9 +41,13 @@ export default function LoginPage() {
         title: 'Login Successful',
         description: 'Welcome back!',
       });
-      router.push('/dashboard');
+      if (state.role === 'pastor') {
+        router.push('/pastor/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
     }
-  }, [state.success, router, toast]);
+  }, [state, router, toast]);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);

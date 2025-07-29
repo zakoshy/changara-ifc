@@ -38,23 +38,27 @@ export async function login(prevState: any, formData: FormData) {
       return { message: 'Invalid credentials provided.' };
     }
 
-    // If a role is specified during login, check if it matches
-    if (role) {
-      if(user.role !== role) {
-        return { message: 'Login failed. Please check your credentials and try again.' };
-      }
-    } else {
-        // This is for the general member login, ensure they are not a pastor
-        if(user.role === 'pastor') {
-             return { message: 'Login failed. Please check your credentials and try again.' };
-        }
-    }
-
     const passwordsMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordsMatch) {
       return { message: 'Invalid credentials provided.' };
     }
+    
+    // If a role is specified during login (i.e., pastor login form), 
+    // check if it matches the user's role.
+    if (role && user.role !== role) {
+      return { message: 'Login failed. You do not have the required role.' };
+    }
+
+    // This is for the general member login, if the user is a pastor, they should be
+    // redirected to the pastor login page. We return the role to handle this on the client.
+    if (!role && user.role === 'pastor') {
+       return { 
+           success: true,
+           role: user.role
+        };
+    }
+    
 
     // In a real app you'd create a session here.
     // We're returning the user role for redirection purposes.
