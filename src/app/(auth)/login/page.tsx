@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useActionState, useEffect, useState } from 'react';
@@ -18,6 +19,7 @@ const initialState = {
   errors: {},
   success: false,
   role: null,
+  email: null,
 };
 
 function SubmitButton() {
@@ -41,6 +43,10 @@ export default function LoginPage() {
         title: 'Login Successful',
         description: 'Welcome back!',
       });
+      // Store user identifier (email) in localStorage on successful login
+      if (state.email) {
+        localStorage.setItem('currentUserEmail', state.email);
+      }
       if (state.role === 'pastor') {
         router.push('/pastor/dashboard');
       } else {

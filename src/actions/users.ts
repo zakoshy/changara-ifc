@@ -1,3 +1,4 @@
+
 'use server';
 
 import clientPromise from '@/lib/mongodb';
@@ -81,20 +82,24 @@ export async function updateUserProfilePicture(userId: string, imageUrl: string)
 }
 
 export async function getUserById(userId: string): Promise<User | null> {
-  // This is a simplified fetch for the demo. In a real app, you would
-  // get the current user from the session.
+  // This is a simplified fetch. In a real app, you would
+  // get the current user from a secure session.
   try {
     const client = await clientPromise;
     const db = client.db();
     const usersCollection = db.collection('users');
     
     let user;
-    // If a valid ID is passed, try to find that user.
+    // If a valid ObjectId is passed, try to find that user by ID.
     if (ObjectId.isValid(userId)) {
         user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    } 
+    // Otherwise, if it's an email (from our localStorage logic), find by email.
+    else if (userId.includes('@')) {
+        user = await usersCollection.findOne({ email: userId });
     }
 
-    // If no user found with ID, or if ID was invalid, find the first 'member'.
+    // If no user is found by ID or email, fall back to the first 'member' for demo purposes.
     if (!user) {
         user = await usersCollection.findOne({ role: 'member' });
     }
@@ -109,9 +114,9 @@ export async function getUserById(userId: string): Promise<User | null> {
         } as User;
     }
 
-    // Fallback for when no member user is in the DB, to prevent the app from crashing.
+    // Fallback for when no member user is in the DB at all.
     return {
-        id: 'fallback-user-id', // This ID is not a valid ObjectId, handled in update action.
+        id: 'fallback-user-id', // This ID is not a valid ObjectId
         name: 'Member User',
         email: 'member@example.com',
         phone: '555-555-5555',

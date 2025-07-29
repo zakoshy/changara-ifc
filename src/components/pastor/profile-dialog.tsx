@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { User } from '@/lib/types';
 import { updateUserProfilePicture } from '@/actions/users';
-import { LoaderCircle, Upload, Mail, User as UserIcon, Phone, KeyRound, Plus } from 'lucide-react';
+import { LoaderCircle, Mail, User as UserIcon, Phone, KeyRound, Camera } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Separator } from '../ui/separator';
 
@@ -42,7 +42,7 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
   const [previewUrl, setPreviewUrl] = useState<string | null>(user.imageUrl || null);
   const [fileToUpload, setFileToUpload] = useState<File | null>(null);
 
-  const handleAvatarClick = () => {
+  const handleCameraClick = () => {
     fileInputRef.current?.click();
   };
 
@@ -58,27 +58,27 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
     }
   };
 
-  const handleSave = () => {
+  const handleSaveChanges = () => {
     if (!fileToUpload) {
-        toast({
-            variant: 'destructive',
-            title: 'No file selected',
-            description: 'Please select a picture to upload.',
-        });
-        return;
+      toast({
+          variant: 'destructive',
+          title: 'No file selected',
+          description: 'Please select a new picture to update your profile.',
+      });
+      return;
     }
     startTransition(async () => {
       // In a real app, this would upload the file and get a URL.
-      // Here we simulate it with a new placeholder URL.
-      const newImageUrl = `https://placehold.co/128x128.png?text=${user.name.charAt(0)}&r=${Math.random()}`;
-      const result = await updateUserProfilePicture(user.id, newImageUrl);
+      // Here we simulate it with a new placeholder URL based on the file preview.
+      const newImageUrl = previewUrl; // Use the preview URL directly
+      const result = await updateUserProfilePicture(user.id, newImageUrl!);
 
       if (result.success) {
         toast({
           title: 'Success!',
           description: result.message,
         });
-        window.location.reload();
+        window.location.reload(); // Reload to show changes everywhere
       } else {
         toast({
           variant: 'destructive',
@@ -99,14 +99,20 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="flex flex-col items-center gap-4">
-            <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
+             <div className="relative">
                 <Avatar className="h-32 w-32 border-2 border-primary/10">
-                <AvatarImage src={previewUrl || user.imageUrl} alt={user.name} />
-                <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={previewUrl || user.imageUrl} alt={user.name} />
+                    <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Plus className="text-white h-10 w-10" />
-                </div>
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className="absolute bottom-1 right-1 h-8 w-8 rounded-full bg-background"
+                    onClick={handleCameraClick}
+                >
+                    <Camera className="h-4 w-4" />
+                    <span className="sr-only">Change profile picture</span>
+                </Button>
             </div>
              <input
               type="file"
@@ -137,13 +143,9 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
           <Button type="button" variant="ghost" onClick={() => setIsOpen(false)} disabled={isPending}>
             Close
           </Button>
-          <Button type="button" onClick={handleSave} disabled={isPending}>
-            {isPending ? (
-              <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Upload className="mr-2 h-4 w-4" />
-            )}
-            Update Picture
+          <Button type="button" onClick={handleSaveChanges} disabled={isPending || !fileToUpload}>
+            {isPending && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
+            Save Changes
           </Button>
         </DialogFooter>
       </DialogContent>

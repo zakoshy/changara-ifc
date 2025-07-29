@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -17,42 +18,50 @@ import { ProfileDialog } from '@/components/dashboard/profile-dialog';
 import { useEffect, useState } from 'react';
 import { getUserById } from '@/actions/users';
 import type { User as UserType } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 
 
-const UserMenu = ({ user }: { user: UserType }) => (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={user.imageUrl} alt={user.name} data-ai-hint="user profile" />
-          <AvatarFallback>{user.name ? user.name.charAt(0) : 'U'}</AvatarFallback>
-        </Avatar>
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent className="w-56" align="end" forceMount>
-      <DropdownMenuLabel className="font-normal">
-        <div className="flex flex-col space-y-1">
-          <p className="text-sm font-medium leading-none">{user.name}</p>
-          <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-        </div>
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
-       <ProfileDialog user={user}>
-          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-          </DropdownMenuItem>
-      </ProfileDialog>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem asChild>
-        <Link href="/">
+const UserMenu = ({ user }: { user: UserType }) => {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem('currentUserEmail');
+    router.push('/');
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={user.imageUrl} alt={user.name} data-ai-hint="user profile" />
+            <AvatarFallback>{user.name ? user.name.charAt(0) : 'U'}</AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{user.name}</p>
+            <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+         <ProfileDialog user={user}>
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+            </DropdownMenuItem>
+        </ProfileDialog>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
-        </Link>
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 const AppLogo = () => (
     <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold" prefetch={false}>
@@ -71,8 +80,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     async function fetchUser() {
       // In a real app, you would get the user ID from the session.
-      // For this demo, we pass a placeholder which the action handles.
-      const userData = await getUserById('no-id'); 
+      // For this prototype, we'll get the email from localStorage.
+      const userEmail = localStorage.getItem('currentUserEmail');
+      const userData = await getUserById(userEmail || 'no-id'); 
       setUser(userData);
     }
     fetchUser();
@@ -83,7 +93,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex items-center justify-center min-h-screen bg-background">
              <div className="flex items-center gap-2 text-lg font-semibold text-muted-foreground">
                 <svg className="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24"></svg>
-                Loading...
+                Loading user data...
             </div>
         </div>
     );

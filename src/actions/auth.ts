@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -50,21 +51,10 @@ export async function login(prevState: any, formData: FormData) {
       return { message: 'Login failed. You do not have the required role.' };
     }
 
-    // This is for the general member login, if the user is a pastor, they should be
-    // redirected to the pastor login page. We return the role to handle this on the client.
-    if (!role && user.role === 'pastor') {
-       return { 
-           success: true,
-           role: user.role
-        };
-    }
-    
-
-    // In a real app you'd create a session here.
-    // We're returning the user role for redirection purposes.
     return {
       success: true,
       role: user.role,
+      email: user.email, // Return email on success
     };
 
   } catch (error) {
