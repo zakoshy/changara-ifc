@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 import clientPromise from '@/lib/mongodb';
 import { randomBytes } from 'crypto';
 import { promisify } from 'util';
+import { sendPasswordResetEmail } from '@/lib/mail';
 
 const loginSchema = z.object({
   identifier: z.string().min(1, { message: 'Please enter your email or name.' }),
@@ -167,15 +168,12 @@ export async function requestPasswordReset(prevState: any, formData: FormData) {
       { $set: { resetToken: token, resetTokenExpiry: tokenExpiry } }
     );
     
-    const resetLink = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002'}/reset-password?token=${token}`;
-
-    // --- In this prototype, we log the link to the console instead of sending an email. ---
-    console.log(`Password reset link for ${email}: ${resetLink}`);
-    // --- End of TODO ---
+    // Send the password reset email
+    await sendPasswordResetEmail(email, token);
 
     return {
       success: true,
-      message: 'A password reset link has been generated. Please check the development console to retrieve it.',
+      message: 'If an account with this email exists, a password reset link has been sent.',
     };
 
   } catch (error) {
