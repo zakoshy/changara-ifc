@@ -73,9 +73,10 @@ export async function createEvent(prevState: any, formData: FormData) {
     if (isTeachingDataPresent) {
         const teachingsCollection = db.collection('teachings');
         
-        // Use the uploaded media URL if available, otherwise a placeholder
-        let mediaUrl = teachingMediaUrl || 'https://placehold.co/600x400.png';
-        if (!teachingMediaUrl) {
+        let mediaUrl = 'https://placehold.co/600x400.png';
+        if (teachingMediaUrl) {
+          mediaUrl = teachingMediaUrl;
+        } else if (teachingMediaType) {
             if (teachingMediaType === 'video') {
                 mediaUrl = 'https://placehold.co/600x400.png/000000/FFFFFF?text=Video';
             } else if (teachingMediaType === 'audio') {
