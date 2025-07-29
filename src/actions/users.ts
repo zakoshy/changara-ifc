@@ -94,20 +94,15 @@ export async function getUserById(userId: string): Promise<User | null> {
     const usersCollection = db.collection('users');
     
     let user;
-    // If a valid ObjectId is passed, try to find that user by ID.
-    if (ObjectId.isValid(userId)) {
-        user = await usersCollection.findOne({ _id: new ObjectId(userId) });
-    } 
-    // Otherwise, if it's an email (from our localStorage logic), find by email.
-    else if (userId.includes('@')) {
+    // Find user by email, which is stored in localStorage
+    if (userId.includes('@')) {
         user = await usersCollection.findOne({ email: userId });
     }
-
-    // If no user is found by ID or email, fall back to the first 'member' for demo purposes.
-    if (!user) {
-        user = await usersCollection.findOne({ role: 'member' });
+    // As a fallback for IDs (though email is primary now)
+    else if (ObjectId.isValid(userId)) {
+        user = await usersCollection.findOne({ _id: new ObjectId(userId) });
     }
-
+    
     if (user) {
         return {
         ...user,
@@ -118,28 +113,12 @@ export async function getUserById(userId: string): Promise<User | null> {
         } as User;
     }
 
-    // Fallback for when no member user is in the DB at all.
-    return {
-        id: 'fallback-user-id', // This ID is not a valid ObjectId
-        name: 'Member User',
-        email: 'member@example.com',
-        phone: '555-555-5555',
-        role: 'member',
-        joinedAt: new Date().toISOString(),
-        imageUrl: 'https://placehold.co/128x128.png'
-    };
+    // Fallback if no user is found by email or ID
+    return null;
+    
   } catch (error) {
     console.error("Failed to fetch user:", error);
-     // Fallback in case of DB error
-    return {
-        id: 'fallback-user-id',
-        name: 'Member User',
-        email: 'member@example.com',
-        phone: '555-555-5555',
-        role: 'member',
-        joinedAt: new Date().toISOString(),
-        imageUrl: 'https://placehold.co/128x128.png'
-    };
+    return null;
   }
 }
 
