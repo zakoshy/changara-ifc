@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useTransition, ChangeEvent, useRef } from 'react';
@@ -38,19 +39,37 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(user.imageUrl || null);
+  const [fileToUpload, setFileToUpload] = useState<File | null>(null);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleSave();
+    const file = e.target.files?.[0];
+    if (file) {
+      setFileToUpload(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const handleSave = () => {
+    if (!fileToUpload) {
+        toast({
+            variant: 'destructive',
+            title: 'No file selected',
+            description: 'Please select a picture to upload.',
+        });
+        return;
+    }
     startTransition(async () => {
+      // In a real app, this would upload the file and get a URL.
+      // Here we simulate it with a new placeholder URL.
       const newImageUrl = `https://placehold.co/128x128.png?text=${user.name.charAt(0)}&r=${Math.random()}`;
       const result = await updateUserProfilePicture(user.id, newImageUrl);
 
@@ -82,7 +101,7 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
           <div className="flex flex-col items-center gap-4">
             <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
                 <Avatar className="h-32 w-32 border-2 border-primary/10">
-                <AvatarImage src={user.imageUrl} alt={user.name} />
+                <AvatarImage src={previewUrl || user.imageUrl} alt={user.name} />
                 <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
@@ -118,7 +137,7 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
           <Button type="button" variant="ghost" onClick={() => setIsOpen(false)} disabled={isPending}>
             Close
           </Button>
-          <Button type="button" onClick={handleAvatarClick} disabled={isPending}>
+          <Button type="button" onClick={handleSave} disabled={isPending}>
             {isPending ? (
               <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
             ) : (
