@@ -39,20 +39,18 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       handleSave();
     }
   };
 
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
   const handleSave = () => {
     startTransition(async () => {
-      // In a real app, this would upload the file to a storage bucket
-      // and get a URL. Here we simulate it with a new placeholder.
       const newImageUrl = `https://placehold.co/128x128.png?text=${user.name.charAt(0)}&r=${Math.random()}`;
       const result = await updateUserProfilePicture(user.id, newImageUrl);
 
@@ -61,7 +59,7 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
           title: 'Success!',
           description: result.message,
         });
-        window.location.reload(); // Reload to show the new picture everywhere
+        window.location.reload();
       } else {
         toast({
           variant: 'destructive',
@@ -82,16 +80,16 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="flex flex-col items-center gap-4">
-             <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
-              <Avatar className="h-32 w-32 border-2 border-primary/10">
+            <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
+                <Avatar className="h-32 w-32 border-2 border-primary/10">
                 <AvatarImage src={user.imageUrl} alt={user.name} />
                 <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                <Plus className="text-white h-10 w-10" />
-              </div>
+                </Avatar>
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Plus className="text-white h-10 w-10" />
+                </div>
             </div>
-            <input
+             <input
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}

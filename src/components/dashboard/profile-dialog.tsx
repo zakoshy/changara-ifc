@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, ChangeEvent } from 'react';
+import { useState, useTransition, ChangeEvent, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { User } from '@/lib/types';
 import { updateUserProfilePicture } from '@/actions/users';
-import { LoaderCircle, Upload, Mail, User as UserIcon, Phone, KeyRound } from 'lucide-react';
+import { LoaderCircle, Upload, Mail, User as UserIcon, Phone, KeyRound, Plus } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Separator } from '../ui/separator';
 
@@ -37,6 +37,11 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -75,10 +80,22 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="flex flex-col items-center gap-4">
-            <Avatar className="h-32 w-32 border-2 border-primary/10">
-              <AvatarImage src={user.imageUrl} alt={user.name} />
-              <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
-            </Avatar>
+            <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
+                <Avatar className="h-32 w-32 border-2 border-primary/10">
+                <AvatarImage src={user.imageUrl} alt={user.name} />
+                <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Plus className="text-white h-10 w-10" />
+                </div>
+            </div>
+             <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+              accept="image/*"
+            />
             <div className="space-y-1 text-center">
               <p className="text-xl font-semibold">{user.name}</p>
               <p className="text-sm text-muted-foreground">{user.email}</p>
@@ -90,13 +107,6 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
             <ProfileInfoRow icon={<Phone className="w-5 h-5" />} label="Phone Number" value={user.phone || 'Not provided'} />
           </div>
           <Separator />
-          <div className="space-y-2">
-            <Label htmlFor="picture-upload">Update Profile Picture</Label>
-            <Input id="picture-upload" type="file" onChange={handleFileChange} className="text-sm" />
-            <p className="text-xs text-muted-foreground">
-              Note: A new random avatar will be generated upon file selection.
-            </p>
-          </div>
           <Button variant="outline" asChild>
             <Link href="/forgot-password">
               <KeyRound className="mr-2 h-4 w-4" />
@@ -105,10 +115,10 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
           </Button>
         </div>
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>
+          <Button type="button" variant="ghost" onClick={() => setIsOpen(false)} disabled={isPending}>
             Close
           </Button>
-          <Button type="button" onClick={handleSave} disabled={isPending}>
+          <Button type="button" onClick={handleAvatarClick} disabled={isPending}>
             {isPending ? (
               <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
             ) : (
