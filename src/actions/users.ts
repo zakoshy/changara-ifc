@@ -10,7 +10,8 @@ export async function getUsers(): Promise<User[]> {
     const client = await clientPromise;
     const db = client.db();
     const usersCollection = db.collection('users');
-    const users = await usersCollection.find({}).toArray();
+    // Find all users who are NOT pastors
+    const users = await usersCollection.find({ role: { $ne: 'pastor' } }).toArray();
 
     return users.map(user => ({
       ...user,
