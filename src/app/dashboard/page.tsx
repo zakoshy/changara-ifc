@@ -12,12 +12,6 @@ export default function DashboardPage({ user }: { user: User }) {
   const [upcomingEvents, setUpcomingEvents] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // The user is now passed as a prop from the layout
-  if (!user) {
-    // This can be a loading state or a fallback, though the layout should prevent this.
-    return <div>Loading user data...</div>;
-  }
-  
   useEffect(() => {
     async function loadEvents() {
         setLoading(true);
@@ -41,8 +35,10 @@ export default function DashboardPage({ user }: { user: User }) {
         setLoading(false);
     }
 
-    loadEvents();
-  }, [])
+    if (user) {
+        loadEvents();
+    }
+  }, [user])
 
 
   return (
@@ -88,4 +84,3 @@ export default function DashboardPage({ user }: { user: User }) {
     </div>
   );
 }
-
