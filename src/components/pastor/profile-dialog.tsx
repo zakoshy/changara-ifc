@@ -92,7 +92,7 @@ export function ProfileDialog({ user, children }: { user: User; children: React.
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-headline">Pastor Profile</DialogTitle>
           <DialogDescription>View your profile information and update your picture.</DialogDescription>
