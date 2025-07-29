@@ -120,7 +120,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </header>
           <main className="flex-1 p-4 sm:px-6">
             <div className="mx-auto max-w-7xl w-full">
-                {children}
+                {React.cloneElement(children as React.ReactElement, { user })}
             </div>
           </main>
       </div>

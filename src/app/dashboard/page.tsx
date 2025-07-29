@@ -1,12 +1,17 @@
+
 import { getEvents } from '@/actions/events';
-import { getUserById } from '@/actions/users';
 import { FeedCard } from '@/components/dashboard/feed-card';
 import { User, Event, FeedItem } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ user }: { user: User }) {
   const allEvents = await getEvents();
-  const user = (await getUserById('no-id')) as User; // Cast as User because we know it returns a user or fallback
+  
+  // The user is now passed as a prop from the layout
+  if (!user) {
+    // This can be a loading state or a fallback
+    return <div>Loading...</div>;
+  }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Set to the beginning of the day
