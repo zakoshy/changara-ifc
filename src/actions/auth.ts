@@ -169,14 +169,13 @@ export async function requestPasswordReset(prevState: any, formData: FormData) {
     
     const resetLink = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002'}/reset-password?token=${token}`;
 
-    // --- TODO: Integrate your email sending service here ---
-    // Example: await sendEmail({ to: email, subject: 'Reset Your Password', body: `Click here to reset: ${resetLink}` });
+    // --- In this prototype, we log the link to the console instead of sending an email. ---
     console.log(`Password reset link for ${email}: ${resetLink}`);
     // --- End of TODO ---
 
     return {
       success: true,
-      message: 'If an account with this email exists, a password reset link has been sent.',
+      message: 'A password reset link has been generated. Please check the development console to retrieve it.',
     };
 
   } catch (error) {
