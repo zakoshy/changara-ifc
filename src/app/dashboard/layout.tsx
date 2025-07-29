@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,7 +16,6 @@ import {
 import { HandHeart, User, LogOut, Sparkles } from 'lucide-react';
 import { GiveDialog } from '@/components/dashboard/give-dialog';
 import { ProfileDialog } from '@/components/dashboard/profile-dialog';
-import { useEffect, useState } from 'react';
 import { getUserById } from '@/actions/users';
 import type { User as UserType } from '@/lib/types';
 import { useRouter } from 'next/navigation';
