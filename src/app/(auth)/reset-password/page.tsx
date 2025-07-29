@@ -36,6 +36,7 @@ function ResetPasswordFormComponent() {
   const token = searchParams.get('token');
   const [state, formAction] = useActionState(resetPassword, initialState);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (state.success && state.message) {
@@ -49,6 +50,10 @@ function ResetPasswordFormComponent() {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+  
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   if (!token) {
@@ -107,6 +112,27 @@ function ResetPasswordFormComponent() {
               </Button>
             </div>
               {state.errors?.password && <p className="text-sm font-medium text-destructive">{state.errors.password[0]}</p>}
+          </div>
+           <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                required
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute inset-y-0 right-0 h-full w-10 text-muted-foreground"
+                onClick={toggleConfirmPasswordVisibility}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            </div>
+            {state.errors?.confirmPassword && <p className="text-sm font-medium text-destructive">{state.errors.confirmPassword[0]}</p>}
           </div>
           <SubmitButton />
         </CardContent>

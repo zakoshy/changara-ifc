@@ -154,7 +154,7 @@ export async function requestPasswordReset(prevState: any, formData: FormData) {
       // Don't reveal if the user exists or not for security reasons
       return {
         success: true,
-        message: 'If an account with this email exists, a password reset link has been sent.',
+        message: 'If an account with this email exists, a password reset link has been sent. Please check the development console to retrieve it.',
       };
     }
 
@@ -173,7 +173,7 @@ export async function requestPasswordReset(prevState: any, formData: FormData) {
 
     return {
       success: true,
-      message: 'If an account with this email exists, a password reset link has been sent.',
+      message: 'A password reset link has been generated. Please check the development console to retrieve it.',
     };
 
   } catch (error) {
@@ -187,6 +187,10 @@ export async function requestPasswordReset(prevState: any, formData: FormData) {
 const resetPasswordSchema = z.object({
   token: z.string().min(1, 'Invalid token.'),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
+  confirmPassword: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords do not match.",
+  path: ["confirmPassword"], // path of error
 });
 
 export async function resetPassword(prevState: any, formData: FormData) {
