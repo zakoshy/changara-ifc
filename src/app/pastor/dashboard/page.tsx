@@ -1,4 +1,4 @@
-import { getEvents, getTeachings } from '@/actions/events';
+import { getEvents, getTeachings, deleteTeaching } from '@/actions/events';
 import { EventCalendar } from '@/components/pastor/event-calendar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import MembersPage from './members/page';
