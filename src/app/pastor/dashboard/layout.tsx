@@ -28,9 +28,10 @@ import { getPastor } from '@/actions/users';
 import { useEffect, useState } from 'react';
 import type { User as UserType } from '@/lib/types';
 import { usePathname } from 'next/navigation';
+import { ProfileDialog } from '@/components/pastor/profile-dialog';
 
 
-const UserMenu = ({ pastor }: { pastor: { name: string, email: string, imageUrl?: string }}) => (
+const UserMenu = ({ pastor }: { pastor: UserType }) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -48,10 +49,12 @@ const UserMenu = ({ pastor }: { pastor: { name: string, email: string, imageUrl?
         </div>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem>
-        <User className="mr-2 h-4 w-4" />
-        <span>Profile</span>
-      </DropdownMenuItem>
+       <ProfileDialog user={pastor}>
+          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+          </DropdownMenuItem>
+      </ProfileDialog>
       <DropdownMenuSeparator />
        <DropdownMenuItem asChild>
         <Link href="/">
@@ -86,22 +89,23 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
     fetchPastor();
   }, []);
 
-  const pastorDetails = pastor ? {
-    name: pastor.name,
-    email: pastor.email,
-    imageUrl: pastor.imageUrl
-  } : {
-    name: 'Pastor',
-    email: 'pastor@example.com',
-    imageUrl: 'https://placehold.co/40x40.png'
-  };
-  
   const getPageTitle = () => {
     if (pathname === '/pastor/dashboard/members') return 'Member Management';
     if (pathname === '/pastor/dashboard/contributions') return 'Contributions';
     if (pathname === '/pastor/dashboard/ai-assistant') return 'AI Assistant';
     if (pathname === '/pastor/dashboard') return 'Events & Teachings';
-    return `Welcome, Pastor ${pastorDetails.name.split(' ')[0]}`;
+    return `Welcome, Pastor ${pastor ? pastor.name.split(' ')[0] : ''}`;
+  }
+
+  if (!pastor) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex items-center gap-2 text-lg font-semibold text-muted-foreground">
+          <svg className="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24"></svg>
+          Loading...
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -150,7 +154,7 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
             <div className="w-full flex-1">
               <h1 className="font-semibold text-lg">{getPageTitle()}</h1>
             </div>
-            <UserMenu pastor={pastorDetails} />
+            <UserMenu pastor={pastor} />
           </header>
           <main className="p-4 sm:px-6 sm:py-6 bg-muted/40">
             <div className="mx-auto max-w-7xl w-full">
