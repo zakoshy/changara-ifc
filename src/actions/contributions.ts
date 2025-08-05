@@ -11,28 +11,23 @@ export async function getContributions(): Promise<Contribution[]> {
     const contributionsCollection = db.collection('contributions');
     const contributions = await contributionsCollection.find({}).sort({ date: -1 }).toArray();
 
-    // In a real app, you might join with the users table to get names.
-    // For now, we'll assume the structure matches the placeholder.
-    // The placeholder data has userName and userEmail, which we don't have in a real scenario yet
-    // without linking contributions to users. We will create mock data for now.
-
-    const formattedContributions = contributions.map(contribution => ({
-      ...contribution,
-      _id: undefined, // remove non-serializable object
-      id: (contribution._id as ObjectId).toString(),
-      userName: 'Member User', // Placeholder name
-      userEmail: 'member@example.com' // Placeholder email
-    })) as Contribution[];
+    // In a real app, you would join with the users table to get names.
+    // For now, we will link contributions to users to get their details.
     
-    // Add placeholder data if none in DB to show table structure
-    if (formattedContributions.length === 0) {
-        return [
-            { id: '1', mpesaRef: 'SGH45KL8OP', userName: 'Alice Johnson', userEmail: 'alice@example.com', date: '2024-07-21' },
-            { id: '2', mpesaRef: 'SGH56MN9PQ', userName: 'Bob Williams', userEmail: 'bob@example.com', date: '2024-07-21' },
-        ];
-    }
+    const usersCollection = db.collection('users');
 
-    return formattedContributions;
+    const formattedContributions = await Promise.all(contributions.map(async (contribution) => {
+        const user = await usersCollection.findOne({ _id: new ObjectId(contribution.userId) });
+        return {
+            ...contribution,
+            _id: undefined, // remove non-serializable object
+            id: (contribution._id as ObjectId).toString(),
+            userName: user ? user.name : 'Unknown Member',
+            userEmail: user ? user.email : 'Unknown Email'
+        }
+    }));
+    
+    return formattedContributions as Contribution[];
 
   } catch (error) {
     console.error("Failed to fetch contributions:", error);
