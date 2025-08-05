@@ -26,25 +26,27 @@ import { ReminderPopover } from './reminder-popover';
 
 const TeachingDisplay = ({ teaching }: { teaching: Teaching }) => {
     const [isDownloading, setIsDownloading] = useState(false);
-    const [isDownloaded, setIsDownloaded] = useState(false);
     const { toast } = useToast();
 
     const handleDownload = async () => {
         setIsDownloading(true);
         try {
-            // Simulate network delay for fetching
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
             const response = await fetch(teaching.mediaUrl);
             if (!response.ok) throw new Error('Network response was not ok.');
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            const extension = teaching.mediaUrl.split('.').pop()?.split('?')[0] || 'mp4';
-            a.download = `${(teaching.text || "teaching_media").replace(/ /g, '_')}.${extension}`;
+            
+            const fileExtension = teaching.mediaUrl.split('.').pop()?.split('?')[0] || 'tmp';
+            let fileName = 'teaching_download';
+            if (teaching.text) {
+                fileName = teaching.text.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            }
+            a.download = `${fileName}.${fileExtension}`;
+            
             document.body.appendChild(a);
-            a.click();
+a.click();
             a.remove();
             window.URL.revokeObjectURL(url);
             
@@ -52,7 +54,6 @@ const TeachingDisplay = ({ teaching }: { teaching: Teaching }) => {
                 title: "Download Started",
                 description: "Your file is downloading.",
             });
-            setIsDownloaded(true);
 
         } catch (error) {
             console.error('Download failed:', error);
@@ -61,7 +62,6 @@ const TeachingDisplay = ({ teaching }: { teaching: Teaching }) => {
                 title: "Download Failed",
                 description: "Could not download the file. Please try again.",
             });
-            // Fallback for simple cases or CORS issues
             window.open(teaching.mediaUrl, '_blank');
         } finally {
             setIsDownloading(false);
@@ -79,38 +79,31 @@ const TeachingDisplay = ({ teaching }: { teaching: Teaching }) => {
     return (
         <div className="space-y-4">
              <Separator />
-            <div className="flex items-center gap-2">
-                {renderTeachingIcon(teaching.mediaType)}
-                <h3 className="text-lg font-semibold">Sermon & Notes</h3>
+            <div className="flex justify-between items-center">
+                 <div className="flex items-center gap-2">
+                    {renderTeachingIcon(teaching.mediaType)}
+                    <h3 className="text-lg font-semibold">Sermon & Notes</h3>
+                </div>
+                 <Button
+                    variant="secondary"
+                    onClick={handleDownload}
+                    disabled={isDownloading}
+                >
+                    {isDownloading ? (
+                        <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <Download className="mr-2 h-4 w-4" />
+                    )}
+                    Download
+                </Button>
             </div>
             
             <div className="relative aspect-video bg-muted rounded-md flex items-center justify-center overflow-hidden">
-                <div className={cn(
-                    "w-full h-full transition-all duration-500",
-                    !isDownloaded && "blur-md scale-110"
-                )}>
+                <div className="w-full h-full">
                     {teaching.mediaType === 'photo' && <Image src={teaching.mediaUrl} alt={teaching.text || 'Teaching media'} width={600} height={400} className="object-cover w-full h-full" data-ai-hint="church teaching" />}
-                    {teaching.mediaType === 'video' && <video src={teaching.mediaUrl} controls={isDownloaded} className="w-full h-full">Your browser does not support the video tag.</video>}
+                    {teaching.mediaType === 'video' && <video src={teaching.mediaUrl} controls className="w-full h-full">Your browser does not support the video tag.</video>}
                     {teaching.mediaType === 'audio' && <div className="p-4 w-full h-full flex items-center justify-center"><audio src={teaching.mediaUrl} controls className="w-full">Your browser does not support the audio element.</audio></div>}
                 </div>
-
-                {!isDownloaded && (
-                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                        <Button
-                            variant="secondary"
-                            size="icon"
-                            className="h-14 w-14 rounded-full shadow-2xl"
-                            onClick={handleDownload}
-                            disabled={isDownloading}
-                        >
-                            {isDownloading ? (
-                                <LoaderCircle className="h-6 w-6 animate-spin" />
-                            ) : (
-                                <Download className="h-6 w-6" />
-                            )}
-                        </Button>
-                    </div>
-                )}
             </div>
 
             {teaching.text && <p className="text-sm text-muted-foreground">{teaching.text}</p>}
@@ -119,23 +112,26 @@ const TeachingDisplay = ({ teaching }: { teaching: Teaching }) => {
 };
 
 
-export function EventDetailsDialog({ event, user, children }: { event: Event, user: User, children: React.ReactNode }) {
-    const [teaching, setTeaching] = useState<Teaching | null>(null);
+export function EventDetailsDialog({ event, teaching: initialTeaching, user, children }: { event?: Event, teaching?: Teaching, user: User, children: React.ReactNode }) {
+    const [teaching, setTeaching] = useState<Teaching | null>(initialTeaching || null);
     const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    
+    const displayTeaching = teaching || initialTeaching;
+    const displayEvent = event;
 
     useEffect(() => {
-        // Only fetch teaching if the dialog is opened and there's a teachingId
-        if (isOpen && event.teachingId && !teaching) {
+        // Fetch teaching if it's part of an event and not already loaded
+        if (isOpen && displayEvent?.teachingId && !displayTeaching) {
             setIsLoading(true);
-            getTeachingById(event.teachingId)
+            getTeachingById(displayEvent.teachingId)
                 .then(data => {
                     setTeaching(data);
                 })
                 .catch(console.error)
                 .finally(() => setIsLoading(false));
         }
-    }, [isOpen, event.teachingId, teaching]);
+    }, [isOpen, displayEvent, displayTeaching]);
 
     // Reset teaching state when dialog closes
     useEffect(() => {
@@ -149,22 +145,27 @@ export function EventDetailsDialog({ event, user, children }: { event: Event, us
             <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="font-headline text-2xl">{event.title}</DialogTitle>
-                    <DialogDescription>{event.description}</DialogDescription>
+                    <DialogTitle className="font-headline text-2xl">{displayEvent?.title || displayTeaching?.text || 'Details'}</DialogTitle>
+                    {displayEvent?.description && <DialogDescription>{displayEvent.description}</DialogDescription>}
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        <span>{format(new Date(event.date), 'EEEE, MMMM do, yyyy')}</span>
-                    </div>
-                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        <span>{event.time}</span>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        <span>{event.location}</span>
-                    </div>
+                    {displayEvent && (
+                        <>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <Calendar className="h-4 w-4" />
+                                <span>{format(new Date(displayEvent.date), 'EEEE, MMMM do, yyyy')}</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <Clock className="h-4 w-4" />
+                                <span>{displayEvent.time}</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <MapPin className="h-4 w-4" />
+                                <span>{displayEvent.location}</span>
+                            </div>
+                        </>
+                    )}
+
 
                     {isLoading && (
                         <div className="flex items-center justify-center p-8">
@@ -172,22 +173,27 @@ export function EventDetailsDialog({ event, user, children }: { event: Event, us
                         </div>
                     )}
 
-                    {teaching && <TeachingDisplay teaching={teaching} />}
+                    {displayTeaching && <TeachingDisplay teaching={displayTeaching} />}
 
-                    {!isLoading && !teaching && event.teachingId &&(
+                    {!isLoading && !displayTeaching && displayEvent?.teachingId &&(
                          <div className="text-center p-4 text-muted-foreground">
                             <p>Could not load teaching materials.</p>
                         </div>
                     )}
                 </div>
                  <DialogFooter className="sm:justify-between gap-2">
-                    <ReminderPopover eventTitle={event.title} />
-                    <GiveDialog title={`Contribute to: ${event.title}`} user={user}>
-                        <Button>Contribute to Event</Button>
-                    </GiveDialog>
+                    {displayEvent ? (
+                        <>
+                            <ReminderPopover eventTitle={displayEvent.title} />
+                            <GiveDialog title={`Contribute to: ${displayEvent.title}`} user={user}>
+                                <Button>Contribute to Event</Button>
+                            </GiveDialog>
+                        </>
+                    ) : (
+                        <Button onClick={() => setIsOpen(false)}>Close</Button>
+                    )}
                 </DialogFooter>
             </DialogContent>
         </Dialog>
     );
 }
-

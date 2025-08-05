@@ -1,12 +1,13 @@
 
-import { getEvents } from '@/actions/events';
+import { getEvents, getTeachings } from '@/actions/events';
 import { FeedCard } from '@/components/dashboard/feed-card';
-import { User, Event, FeedItem } from '@/lib/types';
+import { User, Event, FeedItem, Teaching } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 
 export default async function DashboardPage({ user }: { user: User }) {
-  // Fetch events on the server
+  // Fetch events and teachings on the server
   const allEvents = await getEvents();
+  const allTeachings = await getTeachings();
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Set to the beginning of the day
 
@@ -19,8 +20,15 @@ export default async function DashboardPage({ user }: { user: User }) {
           return false;
       }
       })
-      .map((item) => ({ ...item, type: 'event', sortDate: new Date(item.date) }))
-      .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime()) as FeedItem[];
+      .map((item) => ({ ...item, type: 'event', sortDate: new Date(item.date) })) as FeedItem[];
+      
+  const eventTeachingIds = new Set(allEvents.map(e => e.teachingId).filter(Boolean));
+  const recentTeachings = allTeachings
+    .filter(teaching => !eventTeachingIds.has(teaching.id)) // Filter out teachings already linked to an event
+    .map((item) => ({ ...item, type: 'teaching', sortDate: new Date(item.createdAt) }))
+    .sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime())
+    .slice(0, 6) as FeedItem[]; // Show latest 6 standalone teachings
+
 
   return (
     <div className="flex flex-col gap-8 py-6">
@@ -52,6 +60,28 @@ export default async function DashboardPage({ user }: { user: User }) {
             <h2 className="text-xl font-semibold">No Upcoming Events</h2>
             <p className="text-muted-foreground mt-2">
               There are no upcoming events scheduled. Please check back later!
+            </p>
+          </div>
+        )}
+      </div>
+
+      <Separator />
+
+       <div>
+        <h2 className="text-2xl font-bold tracking-tight font-headline mb-4">
+          Recent Teachings
+        </h2>
+        {recentTeachings.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {recentTeachings.map((item) => (
+              <FeedCard key={`${item.type}-${item.id}`} item={item} user={user} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center text-center py-12 border-2 border-dashed rounded-lg bg-card">
+            <h2 className="text-xl font-semibold">No Recent Teachings</h2>
+            <p className="text-muted-foreground mt-2">
+              The pastor hasn't uploaded any new teachings yet. Please check back later!
             </p>
           </div>
         )}
