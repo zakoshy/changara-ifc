@@ -10,7 +10,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { BookOpen } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { booksOfTheBible } from '@/lib/bibleBooks';
 
 interface BibleApiResponse {
@@ -36,29 +35,19 @@ function BibleReader() {
   const [selectedBook, setSelectedBook] = useState(initialBook);
   const [selectedChapter, setSelectedChapter] = useState(initialChapter);
   const [chapters, setChapters] = useState(booksOfTheBible.find(b => b.englishName === selectedBook)?.chapters || 0);
-  const [translation, setTranslation] = useState<'kjv' | 'ksw09'>('kjv');
 
   const [data, setData] = useState<BibleApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPassage = useCallback(async (bookIdentifier: string, chapter: string) => {
-    if (!bookIdentifier || !chapter) return;
+  const fetchPassage = useCallback(async (bookName: string, chapter: string) => {
+    if (!bookName || !chapter) return;
     setLoading(true);
     setError(null);
     setData(null);
 
-    const bookDetails = booksOfTheBible.find(b => b.englishName === bookIdentifier);
-    if (!bookDetails) {
-        setError("Could not find book details.");
-        setLoading(false);
-        return;
-    }
-
-    const bookNameToFetch = translation === 'ksw09' ? bookDetails.swahiliName : bookDetails.englishName;
-
     try {
-      const response = await fetch(`https://bible-api.com/${encodeURIComponent(`${bookNameToFetch} ${chapter}`)}?translation=${translation}`);
+      const response = await fetch(`https://bible-api.com/${encodeURIComponent(`${bookName} ${chapter}`)}?translation=kjv`);
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(errorData?.error || 'Scripture not found. Please check the reference and try again.');
@@ -70,7 +59,7 @@ function BibleReader() {
     } finally {
       setLoading(false);
     }
-  }, [translation]);
+  }, []);
 
   useEffect(() => {
     fetchPassage(selectedBook, selectedChapter);
@@ -90,7 +79,7 @@ function BibleReader() {
        <Card>
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">Bible Reader</CardTitle>
-                <CardDescription>Select a book and chapter to read. You can also switch between English and Swahili translations.</CardDescription>
+                <CardDescription>Select a book and chapter to read from the King James Version.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -120,15 +109,6 @@ function BibleReader() {
                             </SelectContent>
                         </Select>
                     </div>
-                </div>
-                 <div className="flex items-center space-x-2 pt-2">
-                    <Label htmlFor="translation-switch">King James Version</Label>
-                    <Switch
-                        id="translation-switch"
-                        checked={translation === 'ksw09'}
-                        onCheckedChange={(checked) => setTranslation(checked ? 'ksw09' : 'kjv')}
-                    />
-                    <Label htmlFor="translation-switch">Kiswahili</Label>
                 </div>
             </CardContent>
         </Card>
