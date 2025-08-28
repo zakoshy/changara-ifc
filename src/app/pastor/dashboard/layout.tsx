@@ -1,3 +1,4 @@
+
 'use client';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -27,7 +28,7 @@ import { Users, User, LogOut, Calendar, BookOpen, Sparkles, Save } from 'lucide-
 import { getPastor } from '@/actions/users';
 import { useEffect, useState } from 'react';
 import type { User as UserType } from '@/lib/types';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { ProfileDialog } from '@/components/pastor/profile-dialog';
 
 
@@ -80,6 +81,7 @@ const AppLogo = () => (
 export default function PastorDashboardLayout({ children }: { children: React.ReactNode }) {
   const [pastor, setPastor] = useState<UserType | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchPastor() {
@@ -88,6 +90,12 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
     }
     fetchPastor();
   }, []);
+  
+  const handleLogout = () => {
+    // In a real app, you'd call an API to invalidate the session.
+    // For this prototype, we just redirect.
+    router.push('/');
+  }
 
   const getPageTitle = () => {
     if (pathname === '/pastor/dashboard/members') return 'Member Management';
@@ -151,8 +159,24 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
-          <SidebarFooter>
-             {/* Can add items here later */}
+          <SidebarFooter className="p-2">
+             <SidebarMenu>
+                 <ProfileDialog user={pastor}>
+                    <SidebarMenuButton tooltip="Profile">
+                        <Avatar className="h-7 w-7">
+                            <AvatarImage src={pastor.imageUrl} alt="Pastor" data-ai-hint="pastor portrait"/>
+                            <AvatarFallback>{pastor.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <span>{pastor.name}</span>
+                    </SidebarMenuButton>
+                 </ProfileDialog>
+                <SidebarMenuItem>
+                    <SidebarMenuButton onClick={handleLogout} tooltip="Logout">
+                        <LogOut />
+                        <span>Logout</span>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>
@@ -161,10 +185,9 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
             <div className="w-full flex-1">
               <h1 className="font-semibold text-lg">{getPageTitle()}</h1>
             </div>
-            <UserMenu pastor={pastor} />
           </header>
-          <main className="p-4 sm:px-6 sm:py-6 bg-muted/40">
-            <div className="mx-auto max-w-7xl w-full">
+          <main className="flex-1 p-4 sm:px-6 sm:py-0 bg-muted/40 min-h-[calc(100vh-60px)]">
+            <div className="mx-auto max-w-7xl w-full h-full">
               {children}
             </div>
           </main>
