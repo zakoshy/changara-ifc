@@ -49,8 +49,7 @@ export default function LandingPage() {
             src="https://images.pexels.com/photos/5199797/pexels-photo-5199797.jpeg"
             alt="Church bible"
             fill
-            objectFit="cover"
-            className="absolute inset-0 z-0"
+            className="object-cover absolute inset-0 z-0"
             data-ai-hint="church community"
             priority
           />
@@ -83,7 +82,7 @@ export default function LandingPage() {
                     <p className="text-muted-foreground">Our vision is to be a beacon of hope and a center for spiritual growth, where people from all walks of life can experience God's love, find their purpose, and be equipped to make a difference in the world.</p>
                 </div>
                  <div className="relative h-80 rounded-2xl overflow-hidden shadow-2xl">
-                     <Image src="https://images.pexels.com/photos/236339/pexels-photo-236339.jpeg" alt="Hope" fill objectFit="cover" data-ai-hint="hope light"/>
+                     <Image src="https://images.pexels.com/photos/236339/pexels-photo-236339.jpeg" alt="Hope" fill className="object-cover" data-ai-hint="hope light"/>
                 </div>
             </div>
         </section>
