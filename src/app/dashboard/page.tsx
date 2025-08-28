@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Smartphone, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GiveDialog } from '@/components/dashboard/give-dialog';
+import { PersonalCounselor } from '@/components/dashboard/personal-counselor';
 
 export default async function DashboardPage({ user }: { user: User }) {
   // Fetch events and teachings on the server
@@ -88,6 +89,10 @@ export default async function DashboardPage({ user }: { user: User }) {
           </div>
         )}
       </div>
+
+      <Separator />
+
+      <PersonalCounselor />
 
       <Separator />
 
