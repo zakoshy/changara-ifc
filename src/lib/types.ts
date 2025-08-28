@@ -65,3 +65,11 @@ export type SavedSermonOutline = {
   }[];
   createdAt: string;
 }
+
+export type TeamMember = {
+  _id?: ObjectId;
+  id: string;
+  name: string;
+  position: string;
+  imageUrl: string;
+};
