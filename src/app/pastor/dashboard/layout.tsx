@@ -23,7 +23,7 @@ import {
   SidebarInset,
   SidebarRail
 } from '@/components/ui/sidebar';
-import { Users, User, LogOut, Calendar, BookOpen, Sparkles } from 'lucide-react';
+import { Users, User, LogOut, Calendar, BookOpen, Sparkles, Save } from 'lucide-react';
 import { getPastor } from '@/actions/users';
 import { useEffect, useState } from 'react';
 import type { User as UserType } from '@/lib/types';
@@ -93,6 +93,7 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
     if (pathname === '/pastor/dashboard/members') return 'Member Management';
     if (pathname === '/pastor/dashboard/ai-assistant') return 'AI Assistant';
     if (pathname === '/pastor/dashboard/bible') return 'Bible Reader';
+    if (pathname === '/pastor/dashboard/creations') return 'Saved Creations';
     if (pathname === '/pastor/dashboard') return 'Events & Teachings';
     return `Welcome, Pastor ${pastor ? pastor.name.split(' ')[0] : ''}`;
   }
@@ -109,7 +110,7 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen w-full">
         <Sidebar className="border-r bg-card" collapsible="icon">
           <SidebarRail />
@@ -130,10 +131,16 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
                   <span>Bible</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
+               <SidebarMenuItem>
                 <SidebarMenuButton href="/pastor/dashboard/members" tooltip="Members" isActive={pathname === '/pastor/dashboard/members'}>
                   <Users />
                   <span>Members</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+               <SidebarMenuItem>
+                <SidebarMenuButton href="/pastor/dashboard/creations" tooltip="Saved Creations" isActive={pathname === '/pastor/dashboard/creations'}>
+                  <Save />
+                  <span>Creations</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>

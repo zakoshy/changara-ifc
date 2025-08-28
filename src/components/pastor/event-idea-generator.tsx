@@ -1,13 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Sparkles, LoaderCircle } from 'lucide-react';
+import { Sparkles, LoaderCircle, Save } from 'lucide-react';
 import { generateEventIdeas, GenerateEventIdeasOutput } from '@/ai/flows/event-idea-flow';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { saveEventIdea } from '@/actions/ai-creations';
+import { useToast } from '@/hooks/use-toast';
+
+function SaveButton({ idea }: { idea: { title: string; description: string; } }) {
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
+
+  const handleSave = () => {
+    startTransition(async () => {
+      const result = await saveEventIdea(idea);
+      if (result.success) {
+        toast({ title: 'Success!', description: result.message });
+      } else {
+        toast({ variant: 'destructive', title: 'Error', description: result.message });
+      }
+    });
+  };
+
+  return (
+    <Button size="sm" variant="secondary" onClick={handleSave} disabled={isPending}>
+      {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+      Save Idea
+    </Button>
+  );
+}
 
 export function EventIdeaGenerator() {
   const [keywords, setKeywords] = useState('');
@@ -87,6 +112,9 @@ export function EventIdeaGenerator() {
                 <CardContent>
                   <p className="text-sm text-muted-foreground">{idea.description}</p>
                 </CardContent>
+                <CardFooter>
+                    <SaveButton idea={idea} />
+                </CardFooter>
               </Card>
             ))}
           </div>

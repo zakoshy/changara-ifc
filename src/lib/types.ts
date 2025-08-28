@@ -45,3 +45,23 @@ export type Teaching = {
 
 // Union type for the combined feed
 export type FeedItem = (Event & { type: 'event'; sortDate: Date }) | (Teaching & { type: 'teaching'; sortDate: Date });
+
+export type SavedEventIdea = {
+  _id?: ObjectId;
+  id: string;
+  title: string;
+  description: string;
+  createdAt: string;
+}
+
+export type SavedSermonOutline = {
+  _id?: ObjectId;
+  id: string;
+  sermonTitle: string;
+  outline: {
+    pointTitle: string;
+    content: string;
+    supportingVerses: string[];
+  }[];
+  createdAt: string;
+}

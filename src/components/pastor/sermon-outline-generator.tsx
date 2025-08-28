@@ -1,21 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Sparkles, LoaderCircle, BookOpen } from 'lucide-react';
+import { Sparkles, LoaderCircle, BookOpen, Save } from 'lucide-react';
 import { generateSermonOutline, GenerateSermonOutlineOutput } from '@/ai/flows/sermon-outline-flow';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import { saveSermonOutline } from '@/actions/ai-creations';
+import { useToast } from '@/hooks/use-toast';
+
 
 export function SermonOutlineGenerator() {
   const [topic, setTopic] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<GenerateSermonOutlineOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -33,6 +38,18 @@ export function SermonOutlineGenerator() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSave = () => {
+    if (!result) return;
+    startTransition(async () => {
+      const res = await saveSermonOutline({ sermonTitle: result.sermonTitle, outline: result.outline });
+      if (res.success) {
+        toast({ title: 'Success!', description: res.message });
+      } else {
+        toast({ variant: 'destructive', title: 'Error', description: res.message });
+      }
+    });
   };
 
   return (
@@ -79,7 +96,14 @@ export function SermonOutlineGenerator() {
 
       {result && (
         <div className="p-6 pt-0">
-          <h3 className="font-headline text-lg mb-2">Generated Outline: {result.sermonTitle}</h3>
+            <div className="flex justify-between items-center mb-2">
+                <h3 className="font-headline text-lg">Generated Outline: {result.sermonTitle}</h3>
+                 <Button onClick={handleSave} disabled={isPending}>
+                    {isPending ? <LoaderCircle className="animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    Save Sermon
+                </Button>
+            </div>
+
           <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
             {result.outline.map((point, index) => (
               <AccordionItem value={`item-${index}`} key={index}>
