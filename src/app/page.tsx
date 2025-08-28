@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, HandHeart, Users, ArrowRight, Banknote, Landmark, Smartphone } from 'lucide-react';
+import { Calendar, HandHeart, Users, ArrowRight, Banknote, Landmark, Smartphone, Phone } from 'lucide-react';
 import { DailyQuote } from '@/components/landing/daily-quote';
 import { TeamSection } from '@/components/landing/team-section';
 
@@ -128,21 +128,20 @@ export default function LandingPage() {
                 <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mt-12 text-left">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-3"><Smartphone/> M-Pesa</CardTitle>
+                            <CardTitle className="flex items-center gap-3"><Smartphone/> M-Pesa Paybill</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
-                            <p className="font-semibold">Paybill Number: <span className="font-mono text-primary">123456</span></p>
-                            <p className="font-semibold">Account Number: <span className="font-mono text-primary">Tithe or Offering</span></p>
+                            <p className="font-semibold">Paybill Number: <span className="font-mono text-primary">247247</span></p>
+                            <p className="font-semibold">Account Number: <span className="font-mono text-primary">811335</span></p>
                         </CardContent>
                     </Card>
                      <Card>
                         <CardHeader>
-                             <CardTitle className="flex items-center gap-3"><Landmark/> Bank Deposit</CardTitle>
+                             <CardTitle className="flex items-center gap-3"><Phone/> Lipa na M-Pesa</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
-                            <p className="font-semibold">Bank Name: <span className="font-mono text-primary">KCB Bank</span></p>
-                            <p className="font-semibold">Account Number: <span className="font-mono text-primary">1234567890</span></p>
-                            <p className="font-semibold">Account Name: <span className="font-mono text-primary">IFC Changara</span></p>
+                            <p className="font-semibold">Send money directly to our treasurer:</p>
+                            <p className="font-semibold">Number: <span className="font-mono text-primary">0710660051</span></p>
                         </CardContent>
                     </Card>
                 </div>
