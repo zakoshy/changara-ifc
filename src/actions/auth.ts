@@ -168,7 +168,7 @@ export async function requestPasswordReset(prevState: any, formData: FormData) {
       { $set: { resetToken: token, resetTokenExpiry: tokenExpiry } }
     );
     
-    // Send the password reset email
+    // Send the password reset email by logging to console
     await sendPasswordResetEmail(email, token);
 
     return {
