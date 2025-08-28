@@ -2,7 +2,7 @@
 /**
  * @fileOverview An AI flow for generating a sermon outline.
  * 
- * - generateSermonOutline - A function that generates a sermon outline based on a topic and scripture.
+ * - generateSermonOutline - A function that generates a sermon outline based on a topic.
  * - GenerateSermonOutlineInput - The input type for the generateSermonOutline function.
  * - GenerateSermonOutlineOutput - The return type for the generateSermonOutline function.
  */
@@ -12,7 +12,6 @@ import { z } from 'zod';
 
 const GenerateSermonOutlineInputSchema = z.object({
   topic: z.string().describe('The main topic or title of the sermon.'),
-  scriptures: z.string().describe('A comma-separated list of key bible verses or passages.'),
 });
 export type GenerateSermonOutlineInput = z.infer<typeof GenerateSermonOutlineInputSchema>;
 
@@ -39,18 +38,17 @@ const prompt = ai.definePrompt({
   output: { schema: GenerateSermonOutlineOutputSchema },
   prompt: `You are an expert theologian and pastor, skilled at crafting clear and impactful sermons for a Christian congregation.
 
-Your task is to create a sermon outline based on the provided topic and scriptures.
+Your task is to create a sermon outline based on the provided topic. You must identify relevant key scriptures to support the sermon's message.
 
 Topic: {{{topic}}}
-Key Scriptures: {{{scriptures}}}
 
 The outline must include:
 1.  A compelling sermon title.
 2.  An "Introduction" that grabs the audience's attention and introduces the topic.
-3.  At least two "Main Points" that develop the topic, using the provided scriptures as a foundation. Explain the scriptures and provide practical applications.
+3.  At least two "Main Points" that develop the topic. For each point, find and use appropriate scriptures as a foundation. Explain the scriptures and provide practical applications.
 4.  A "Conclusion" that summarizes the key takeaways and offers a call to action or encouragement.
 
-For each point in the outline, provide a title, detailed content, and a list of supporting verses.`,
+For each point in the outline, provide a title, detailed content, and a list of the supporting verses you identified.`,
 });
 
 const sermonOutlineFlow = ai.defineFlow(

@@ -12,21 +12,20 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '..
 
 export function SermonOutlineGenerator() {
   const [topic, setTopic] = useState('');
-  const [scriptures, setScriptures] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<GenerateSermonOutlineOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!topic || !scriptures) return;
+    if (!topic) return;
 
     setLoading(true);
     setError(null);
     setResult(null);
 
     try {
-      const sermonResult = await generateSermonOutline({ topic, scriptures });
+      const sermonResult = await generateSermonOutline({ topic });
       setResult(sermonResult);
     } catch (e) {
       setError('An error occurred while generating the sermon outline. Please try again.');
@@ -41,7 +40,7 @@ export function SermonOutlineGenerator() {
         <CardHeader>
           <CardTitle className="font-headline">Sermon Outline Generator</CardTitle>
           <CardDescription>
-            Provide a topic and key scriptures to generate a structured sermon outline.
+            Provide a topic to generate a structured sermon outline with key scriptures.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -55,19 +54,9 @@ export function SermonOutlineGenerator() {
               disabled={loading}
             />
           </div>
-          <div className="grid w-full items-center gap-1.5">
-            <Label htmlFor="scriptures">Key Scriptures</Label>
-            <Input
-              id="scriptures"
-              placeholder="e.g., Matthew 6:14-15, Ephesians 4:32"
-              value={scriptures}
-              onChange={(e) => setScriptures(e.target.value)}
-              disabled={loading}
-            />
-          </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" disabled={loading || !topic || !scriptures}>
+          <Button type="submit" disabled={loading || !topic}>
             {loading ? (
               <LoaderCircle className="animate-spin" />
             ) : (
