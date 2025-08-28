@@ -198,8 +198,8 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
             </div>
             <UserMenu pastor={pastor} />
           </header>
-          <main className="flex-1 p-4 sm:px-6 sm:py-6 bg-muted/40 min-h-[calc(100vh-60px)]">
-            <div className="mx-auto max-w-7xl w-full h-full">
+          <main className="flex flex-1 flex-col p-4 sm:px-6 sm:py-6 bg-muted/40 min-h-[calc(100vh-60px)]">
+            <div className="mx-auto max-w-7xl w-full h-full flex-1">
               {children}
             </div>
           </main>
