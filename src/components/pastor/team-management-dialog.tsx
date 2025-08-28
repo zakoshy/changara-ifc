@@ -144,8 +144,17 @@ export function TeamManagementDialog({ teamMembers, children }: { teamMembers: T
     setEditingMember(null);
   };
 
+  const onDialogChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      // Reset form view when dialog closes
+      setIsFormVisible(false);
+      setEditingMember(null);
+    }
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={onDialogChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>

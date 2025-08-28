@@ -11,7 +11,7 @@ const teamMemberSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(2, 'Name is required.'),
   position: z.string().min(2, 'Position is required.'),
-  imageUrl: z.string().url('A valid image URL is required.'),
+  imageUrl: z.string().optional(),
 });
 
 export async function addOrUpdateTeamMember(prevState: any, formData: FormData) {
@@ -33,12 +33,18 @@ export async function addOrUpdateTeamMember(prevState: any, formData: FormData) 
     const db = client.db();
     const collection = db.collection('teamMembers');
 
+    const memberData = {
+        ...data,
+        // Use a placeholder if no image is provided.
+        imageUrl: data.imageUrl || `https://placehold.co/128x128.png?text=${data.name.charAt(0)}`
+    };
+
     if (id && ObjectId.isValid(id)) {
       // Update existing member
-      await collection.updateOne({ _id: new ObjectId(id) }, { $set: data });
+      await collection.updateOne({ _id: new ObjectId(id) }, { $set: memberData });
     } else {
       // Add new member
-      await collection.insertOne(data);
+      await collection.insertOne(memberData);
     }
 
     revalidatePath('/pastor/dashboard/members');
