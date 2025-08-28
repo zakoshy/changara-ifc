@@ -1,9 +1,13 @@
+
 import { generateDailyQuote } from "@/ai/flows/daily-quote-flow";
 import { Lightbulb, BookOpen } from "lucide-react";
 import Link from 'next/link';
 
 export async function DailyQuote() {
-    const { quote, verse } = await generateDailyQuote();
+    // const { quote, verse } = await generateDailyQuote();
+    const quote = "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.";
+    const verse = "John 3:16";
+
 
     return (
         <section className="bg-primary/5 py-20 md:py-24">
