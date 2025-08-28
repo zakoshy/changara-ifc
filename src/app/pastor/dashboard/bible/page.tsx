@@ -4,11 +4,14 @@
 import { Suspense, useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { BookOpen, Search } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { booksOfTheBible } from '@/lib/bibleBooks';
 
 interface BibleApiResponse {
     reference: string;
@@ -27,21 +30,26 @@ interface BibleApiResponse {
 
 function BibleReader() {
   const searchParams = useSearchParams();
-  const initialPassage = searchParams.get('passage') || 'John 3:16';
-  const [passage, setPassage] = useState(initialPassage);
-  const [searchQuery, setSearchQuery] = useState(initialPassage);
+  const initialBook = searchParams.get('passage')?.split(' ')[0] || 'John';
+  const initialChapter = searchParams.get('passage')?.split(' ')[1]?.split(':')[0] || '3';
+  
+  const [selectedBook, setSelectedBook] = useState(initialBook);
+  const [selectedChapter, setSelectedChapter] = useState(initialChapter);
+  const [chapters, setChapters] = useState(booksOfTheBible.find(b => b.name === selectedBook)?.chapters || 0);
+  const [translation, setTranslation] = useState<'kjv' | 'ksw09'>('kjv');
+
   const [data, setData] = useState<BibleApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPassage = useCallback(async (query: string) => {
-    if (!query) return;
+  const fetchPassage = useCallback(async (book: string, chapter: string) => {
+    if (!book || !chapter) return;
     setLoading(true);
     setError(null);
     setData(null);
 
     try {
-      const response = await fetch(`https://bible-api.com/${encodeURIComponent(query)}`);
+      const response = await fetch(`https://bible-api.com/${encodeURIComponent(`${book} ${chapter}`)}?translation=${translation}`);
       if (!response.ok) {
         throw new Error('Scripture not found. Please check the reference and try again.');
       }
@@ -52,37 +60,66 @@ function BibleReader() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [translation]);
 
   useEffect(() => {
-    fetchPassage(passage);
-  }, [passage, fetchPassage]);
+    fetchPassage(selectedBook, selectedChapter);
+  }, [selectedBook, selectedChapter, fetchPassage]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setPassage(searchQuery);
-  };
+  const handleBookChange = (bookName: string) => {
+      const book = booksOfTheBible.find(b => b.name === bookName);
+      if (book) {
+          setSelectedBook(book.name);
+          setChapters(book.chapters);
+          setSelectedChapter('1'); // Reset to chapter 1 when book changes
+      }
+  }
 
   return (
     <div className="space-y-6">
        <Card>
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">Bible Reader</CardTitle>
-                <CardDescription>Look up any scripture. Try "Genesis 1:1" or "Romans 8:28".</CardDescription>
+                <CardDescription>Select a book and chapter to read. You can also switch between English and Swahili translations.</CardDescription>
             </CardHeader>
-            <CardContent>
-                <form onSubmit={handleSearch} className="flex items-center gap-2">
-                    <Input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Enter a scripture reference..."
-                        className="flex-grow"
+            <CardContent className="space-y-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="grid gap-1.5 flex-1">
+                        <Label>Book</Label>
+                        <Select value={selectedBook} onValueChange={handleBookChange}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a book" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {booksOfTheBible.map(book => (
+                                    <SelectItem key={book.name} value={book.name}>{book.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-1.5">
+                        <Label>Chapter</Label>
+                        <Select value={selectedChapter} onValueChange={setSelectedChapter} disabled={!selectedBook}>
+                             <SelectTrigger className="w-[120px]">
+                                <SelectValue placeholder="Ch." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Array.from({ length: chapters }, (_, i) => i + 1).map(chapterNum => (
+                                    <SelectItem key={chapterNum} value={String(chapterNum)}>{chapterNum}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                 <div className="flex items-center space-x-2 pt-2">
+                    <Label htmlFor="translation-switch">King James Version</Label>
+                    <Switch
+                        id="translation-switch"
+                        checked={translation === 'ksw09'}
+                        onCheckedChange={(checked) => setTranslation(checked ? 'ksw09' : 'kjv')}
                     />
-                    <Button type="submit" size="icon" aria-label="Search" disabled={loading}>
-                        <Search className="h-4 w-4" />
-                    </Button>
-                </form>
+                    <Label htmlFor="translation-switch">Kiswahili</Label>
+                </div>
             </CardContent>
         </Card>
 
@@ -114,14 +151,14 @@ function BibleReader() {
               <BookOpen className="h-6 w-6 text-primary" />
               {data.reference}
             </CardTitle>
-            <CardDescription>{data.translation_name}</CardDescription>
+            <CardDescription>{data.translation_name} ({data.translation_id.toUpperCase()})</CardDescription>
           </CardHeader>
           <CardContent className="prose prose-lg max-w-none text-foreground leading-loose">
             <p>
               {data.verses.map(verse => (
                 <span key={verse.verse}>
                   <sup className="font-bold text-primary text-sm pr-1">{verse.verse}</sup>
-                  {verse.text}
+                  {verse.text.trim()}{' '}
                 </span>
               ))}
             </p>

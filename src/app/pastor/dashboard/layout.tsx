@@ -23,7 +23,7 @@ import {
   SidebarInset,
   SidebarRail
 } from '@/components/ui/sidebar';
-import { Users, User, LogOut, HandHeart, Calendar, BookOpen, Sparkles } from 'lucide-react';
+import { Users, User, LogOut, Calendar, BookOpen, Sparkles } from 'lucide-react';
 import { getPastor } from '@/actions/users';
 import { useEffect, useState } from 'react';
 import type { User as UserType } from '@/lib/types';
@@ -91,7 +91,6 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
 
   const getPageTitle = () => {
     if (pathname === '/pastor/dashboard/members') return 'Member Management';
-    if (pathname === '/pastor/dashboard/contributions') return 'Contributions';
     if (pathname === '/pastor/dashboard/ai-assistant') return 'AI Assistant';
     if (pathname === '/pastor/dashboard/bible') return 'Bible Reader';
     if (pathname === '/pastor/dashboard') return 'Events & Teachings';
@@ -138,12 +137,6 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/pastor/dashboard/contributions" tooltip="Contributions" isActive={pathname === '/pastor/dashboard/contributions'}>
-                    <HandHeart />
-                    <span>Contributions</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-                <SidebarMenuItem>
                 <SidebarMenuButton href="/pastor/dashboard/ai-assistant" tooltip="AI Assistant" isActive={pathname === '/pastor/dashboard/ai-assistant'}>
                     <Sparkles />
                     <span>AI Assistant</span>
