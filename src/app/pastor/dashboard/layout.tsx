@@ -93,6 +93,7 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
     if (pathname === '/pastor/dashboard/members') return 'Member Management';
     if (pathname === '/pastor/dashboard/contributions') return 'Contributions';
     if (pathname === '/pastor/dashboard/ai-assistant') return 'AI Assistant';
+    if (pathname === '/pastor/dashboard/bible') return 'Bible Reader';
     if (pathname === '/pastor/dashboard') return 'Events & Teachings';
     return `Welcome, Pastor ${pastor ? pastor.name.split(' ')[0] : ''}`;
   }
@@ -119,9 +120,15 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
           <SidebarContent className="p-2">
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/pastor/dashboard" tooltip="Events" isActive={pathname === '/pastor/dashboard'}>
+                <SidebarMenuButton href="/pastor/dashboard" tooltip="Dashboard" isActive={pathname === '/pastor/dashboard'}>
                   <Calendar />
-                  <span>Events</span>
+                  <span>Dashboard</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton href="/pastor/dashboard/bible" tooltip="Bible" isActive={pathname === '/pastor/dashboard/bible'}>
+                  <BookOpen />
+                  <span>Bible</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>

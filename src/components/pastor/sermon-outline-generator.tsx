@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -90,7 +91,11 @@ export function SermonOutlineGenerator() {
                         <h4 className="font-medium text-xs mb-2 flex items-center gap-2"><BookOpen className="h-4 w-4" /> Supporting Verses</h4>
                         <div className="flex flex-wrap gap-2">
                             {point.supportingVerses.map(verse => (
-                                <span key={verse} className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full">{verse}</span>
+                                <Button key={verse} variant="secondary" size="sm" asChild className="h-auto px-2 py-1 text-xs">
+                                  <Link href={`/pastor/dashboard/bible?passage=${encodeURIComponent(verse)}`}>
+                                    {verse}
+                                  </Link>
+                                </Button>
                             ))}
                         </div>
                     </div>
