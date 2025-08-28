@@ -35,23 +35,33 @@ function BibleReader() {
   
   const [selectedBook, setSelectedBook] = useState(initialBook);
   const [selectedChapter, setSelectedChapter] = useState(initialChapter);
-  const [chapters, setChapters] = useState(booksOfTheBible.find(b => b.name === selectedBook)?.chapters || 0);
+  const [chapters, setChapters] = useState(booksOfTheBible.find(b => b.englishName === selectedBook)?.chapters || 0);
   const [translation, setTranslation] = useState<'kjv' | 'ksw09'>('kjv');
 
   const [data, setData] = useState<BibleApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPassage = useCallback(async (book: string, chapter: string) => {
-    if (!book || !chapter) return;
+  const fetchPassage = useCallback(async (bookIdentifier: string, chapter: string) => {
+    if (!bookIdentifier || !chapter) return;
     setLoading(true);
     setError(null);
     setData(null);
 
+    const bookDetails = booksOfTheBible.find(b => b.englishName === bookIdentifier);
+    if (!bookDetails) {
+        setError("Could not find book details.");
+        setLoading(false);
+        return;
+    }
+
+    const bookNameToFetch = translation === 'ksw09' ? bookDetails.swahiliName : bookDetails.englishName;
+
     try {
-      const response = await fetch(`https://bible-api.com/${encodeURIComponent(`${book} ${chapter}`)}?translation=${translation}`);
+      const response = await fetch(`https://bible-api.com/${encodeURIComponent(`${bookNameToFetch} ${chapter}`)}?translation=${translation}`);
       if (!response.ok) {
-        throw new Error('Scripture not found. Please check the reference and try again.');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || 'Scripture not found. Please check the reference and try again.');
       }
       const result: BibleApiResponse = await response.json();
       setData(result);
@@ -66,10 +76,10 @@ function BibleReader() {
     fetchPassage(selectedBook, selectedChapter);
   }, [selectedBook, selectedChapter, fetchPassage]);
 
-  const handleBookChange = (bookName: string) => {
-      const book = booksOfTheBible.find(b => b.name === bookName);
+  const handleBookChange = (bookEnglishName: string) => {
+      const book = booksOfTheBible.find(b => b.englishName === bookEnglishName);
       if (book) {
-          setSelectedBook(book.name);
+          setSelectedBook(book.englishName);
           setChapters(book.chapters);
           setSelectedChapter('1'); // Reset to chapter 1 when book changes
       }
@@ -92,7 +102,7 @@ function BibleReader() {
                             </SelectTrigger>
                             <SelectContent>
                                 {booksOfTheBible.map(book => (
-                                    <SelectItem key={book.name} value={book.name}>{book.name}</SelectItem>
+                                    <SelectItem key={book.englishName} value={book.englishName}>{book.englishName}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
