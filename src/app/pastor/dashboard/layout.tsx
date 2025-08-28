@@ -32,40 +32,47 @@ import { usePathname, useRouter } from 'next/navigation';
 import { ProfileDialog } from '@/components/pastor/profile-dialog';
 
 
-const UserMenu = ({ pastor }: { pastor: UserType }) => (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={pastor.imageUrl} alt="Pastor" data-ai-hint="pastor portrait"/>
-          <AvatarFallback>{pastor.name.charAt(0)}</AvatarFallback>
-        </Avatar>
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent className="w-56" align="end" forceMount>
-      <DropdownMenuLabel className="font-normal">
-        <div className="flex flex-col space-y-1">
-          <p className="text-sm font-medium leading-none">{pastor.name}</p>
-          <p className="text-xs leading-none text-muted-foreground">{pastor.email}</p>
-        </div>
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
-       <ProfileDialog user={pastor}>
-          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-          </DropdownMenuItem>
-      </ProfileDialog>
-      <DropdownMenuSeparator />
-       <DropdownMenuItem asChild>
-        <Link href="/">
+const UserMenu = ({ pastor }: { pastor: UserType }) => {
+  const router = useRouter();
+  
+  const handleLogout = () => {
+    localStorage.removeItem('currentUserEmail');
+    router.push('/');
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={pastor.imageUrl} alt="Pastor" data-ai-hint="pastor portrait"/>
+            <AvatarFallback>{pastor.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{pastor.name}</p>
+            <p className="text-xs leading-none text-muted-foreground">{pastor.email}</p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <ProfileDialog user={pastor}>
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+            </DropdownMenuItem>
+        </ProfileDialog>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
-        </Link>
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 const AppLogo = () => (
     <Link href="/pastor/dashboard" className="flex items-center gap-2 text-lg font-semibold" prefetch={false}>
@@ -86,31 +93,27 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
   useEffect(() => {
     async function fetchPastor() {
       const pastorData = await getPastor();
-      setPastor(pastorData);
+      if (pastorData) {
+        setPastor(pastorData);
+      } else {
+        router.push('/pastor/login');
+      }
     }
     fetchPastor();
-  }, []);
+  }, [router]);
   
   const handleLogout = () => {
-    // In a real app, you'd call an API to invalidate the session.
-    // For this prototype, we just redirect.
     router.push('/');
-  }
-
-  const getPageTitle = () => {
-    if (pathname === '/pastor/dashboard/members') return 'Member Management';
-    if (pathname === '/pastor/dashboard/ai-assistant') return 'AI Assistant';
-    if (pathname === '/pastor/dashboard/bible') return 'Bible Reader';
-    if (pathname === '/pastor/dashboard/creations') return 'Saved Creations';
-    if (pathname === '/pastor/dashboard') return 'Events & Teachings';
-    return `Welcome, Pastor ${pastor ? pastor.name.split(' ')[0] : ''}`;
   }
 
   if (!pastor) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex items-center gap-2 text-lg font-semibold text-muted-foreground">
-          <svg className="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24"></svg>
+          <svg className="animate-spin h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
           Loading...
         </div>
       </div>
@@ -159,17 +162,8 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
-          <SidebarFooter className="p-2">
+           <SidebarFooter className="p-2">
              <SidebarMenu>
-                 <ProfileDialog user={pastor}>
-                    <SidebarMenuButton tooltip="Profile">
-                        <Avatar className="h-7 w-7">
-                            <AvatarImage src={pastor.imageUrl} alt="Pastor" data-ai-hint="pastor portrait"/>
-                            <AvatarFallback>{pastor.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span>{pastor.name}</span>
-                    </SidebarMenuButton>
-                 </ProfileDialog>
                 <SidebarMenuItem>
                     <SidebarMenuButton onClick={handleLogout} tooltip="Logout">
                         <LogOut />
@@ -180,13 +174,31 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>
-          <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
-            <SidebarTrigger />
-            <div className="w-full flex-1">
-              <h1 className="font-semibold text-lg">{getPageTitle()}</h1>
+          <header className="sticky top-0 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+            <SidebarTrigger className="sm:hidden" />
+            <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+              <Link href="/pastor/dashboard" className={`font-bold ${pathname === '/pastor/dashboard' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                Dashboard
+              </Link>
+              <Link href="/pastor/dashboard/bible" className={`font-bold ${pathname === '/pastor/dashboard/bible' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                Bible
+              </Link>
+              <Link href="/pastor/dashboard/members" className={`font-bold ${pathname === '/pastor/dashboard/members' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                Members
+              </Link>
+              <Link href="/pastor/dashboard/creations" className={`font-bold ${pathname === '/pastor/dashboard/creations' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                Creations
+              </Link>
+               <Link href="/pastor/dashboard/ai-assistant" className={`font-bold ${pathname === '/pastor/dashboard/ai-assistant' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                AI Assistant
+              </Link>
+            </nav>
+            <div className="relative ml-auto flex-1 md:grow-0">
+               {/* This space can be used for a search bar if needed in the future */}
             </div>
+            <UserMenu pastor={pastor} />
           </header>
-          <main className="flex-1 p-4 sm:px-6 sm:py-0 bg-muted/40 min-h-[calc(100vh-60px)]">
+          <main className="flex-1 p-4 sm:px-6 sm:py-6 bg-muted/40 min-h-[calc(100vh-60px)]">
             <div className="mx-auto max-w-7xl w-full h-full">
               {children}
             </div>
