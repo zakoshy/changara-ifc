@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { LoaderCircle, Plus, FileImage, Video, Mic } from 'lucide-react';
+import { LoaderCircle, Plus, FileImage, Video, Mic, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Event, Teaching } from '@/lib/types';
 import { Card, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Image from 'next/image';
+import { DatePicker } from '../ui/date-picker';
 
 
 const initialState = {
@@ -44,11 +45,13 @@ export function EventForm({
     onFinished,
     event,
     teaching,
+    isTeachingOnly = false,
 }: { 
     selectedDate?: Date; 
     onFinished: () => void;
     event?: Event | null;
     teaching?: Teaching | null;
+    isTeachingOnly?: boolean;
 }) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -59,6 +62,9 @@ export function EventForm({
 
   const [teachingMediaType, setTeachingMediaType] = useState<'photo' | 'video' | 'audio'>('photo');
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [teachingDate, setTeachingDate] = useState<Date | undefined>(
+    isTeachingOnly ? new Date() : undefined
+  );
   
   // When the component loads in edit mode, set the media preview from the teaching prop
   useEffect(() => {
@@ -66,7 +72,10 @@ export function EventForm({
       setMediaPreview(teaching.mediaUrl);
       setTeachingMediaType(teaching.mediaType);
     }
-  }, [teaching]);
+    if (isTeachingOnly && teaching?.createdAt) {
+        setTeachingDate(new Date(teaching.createdAt));
+    }
+  }, [teaching, isTeachingOnly]);
 
 
   useEffect(() => {
@@ -109,41 +118,43 @@ export function EventForm({
       )}
 
       {/* --- EVENT FORM --- */}
-      <div className="space-y-4 p-4 border rounded-lg">
-        <CardHeader className="p-0">
-          <CardTitle className="text-lg">Create an Event</CardTitle>
-          <CardDescription>This section is optional. Fill it out to schedule a new event.</CardDescription>
-        </CardHeader>
-        
-        <input type="hidden" name="date" value={dateValue} />
-        {isEditing && event && <input type="hidden" name="id" value={event.id} />}
-        {isEditing && teaching && <input type="hidden" name="teachingId" value={teaching.id} />}
+      {!isTeachingOnly && (
+        <div className="space-y-4 p-4 border rounded-lg">
+          <CardHeader className="p-0">
+            <CardTitle className="text-lg">Create an Event</CardTitle>
+            <CardDescription>This section is optional. Fill it out to schedule a new event.</CardDescription>
+          </CardHeader>
+          
+          <input type="hidden" name="date" value={dateValue} />
+          {isEditing && event && <input type="hidden" name="id" value={event.id} />}
+          {isEditing && teaching && <input type="hidden" name="teachingId" value={teaching.id} />}
 
-        <div className="space-y-2">
-          <Label htmlFor="title">Event Title</Label>
-          <Input id="title" name="title" placeholder="e.g., Sunday Service" defaultValue={event?.title}/>
-          {state.errors?.title && <p className="text-sm font-medium text-destructive">{state.errors.title[0]}</p>}
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="title">Event Title</Label>
+            <Input id="title" name="title" placeholder="e.g., Sunday Service" defaultValue={event?.title}/>
+            {state.errors?.title && <p className="text-sm font-medium text-destructive">{state.errors.title[0]}</p>}
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea id="description" name="description" placeholder="Briefly describe the event..." defaultValue={event?.description}/>
-          {state.errors?.description && <p className="text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea id="description" name="description" placeholder="Briefly describe the event..." defaultValue={event?.description}/>
+            {state.errors?.description && <p className="text-sm font-medium text-destructive">{state.errors.description[0]}</p>}
+          </div>
 
-        <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                  <Label htmlFor="time">Time</Label>
-                  <Input id="time" name="time" type="time" defaultValue={event?.time} />
-                  {state.errors?.time && <p className="text-sm font-medium text-destructive">{state.errors.time[0]}</p>}
-              </div>
-              <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input id="location" name="location" placeholder="e.g., Main Sanctuary" defaultValue={event?.location}/>
-                  {state.errors?.location && <p className="text-sm font-medium text-destructive">{state.errors.location[0]}</p>}
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="time">Time</Label>
+                    <Input id="time" name="time" type="time" defaultValue={event?.time} />
+                    {state.errors?.time && <p className="text-sm font-medium text-destructive">{state.errors.time[0]}</p>}
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input id="location" name="location" placeholder="e.g., Main Sanctuary" defaultValue={event?.location}/>
+                    {state.errors?.location && <p className="text-sm font-medium text-destructive">{state.errors.location[0]}</p>}
+                </div>
+          </div>
         </div>
-      </div>
+      )}
       
       {/* --- TEACHING FORM --- */}
        <div className="space-y-4 p-4 border rounded-lg">
@@ -154,6 +165,8 @@ export function EventForm({
           
           <input type="hidden" name="teachingMediaType" value={teachingMediaType} />
           {mediaPreview && <input type="hidden" name="teachingMediaUrl" value={mediaPreview} />}
+          {teachingDate && <input type="hidden" name="teachingDate" value={teachingDate.toISOString()} />}
+
 
           <Input 
             id="teachingMediaFileInput" 
@@ -165,6 +178,13 @@ export function EventForm({
             accept="image/*,video/*,audio/*"
             disabled={isEditing}
           />
+
+          {isTeachingOnly && (
+             <div className="space-y-2">
+              <Label htmlFor="teaching-date">Teaching Date</Label>
+              <DatePicker date={teachingDate} setDate={setTeachingDate} />
+            </div>
+          )}
 
           {mediaPreview && (
              <div className="mt-4 p-2 border rounded-md">

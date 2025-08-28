@@ -235,6 +235,7 @@ function SermonsTab() {
                     </DialogHeader>
                     <EventForm
                         onFinished={closeForm}
+                        isTeachingOnly={true}
                         teaching={{
                             id: '',
                             text: selectedSermon ? formatSermonText(selectedSermon) : '',

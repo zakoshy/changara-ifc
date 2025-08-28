@@ -21,6 +21,7 @@ const eventSchema = z.object({
   teachingText: z.string().optional(),
   teachingMediaType: z.enum(['photo', 'video', 'audio']).optional(),
   teachingMediaUrl: z.any().optional(), // For file upload placeholder
+  teachingDate: z.string().optional(), // For new teachings from saved sermons
 });
 
 
@@ -51,7 +52,7 @@ export async function createEvent(prevState: any, formData: FormData) {
     };
   }
 
-  const { title, description, date, time, location, teachingText, teachingMediaType, teachingMediaUrl } = validatedFields.data;
+  const { title, description, date, time, location, teachingText, teachingMediaType, teachingMediaUrl, teachingDate } = validatedFields.data;
   
   const isEventDataPresent = title && description && date && time && location;
   const isTeachingDataPresent = teachingText || teachingMediaUrl;
@@ -86,13 +87,15 @@ export async function createEvent(prevState: any, formData: FormData) {
 
         const newTeachingId = uuidv4();
         teachingId = newTeachingId; // Assign for event linking
+        
+        const createdAt = teachingDate ? new Date(teachingDate).toISOString() : new Date().toISOString();
 
         const teachingCreationPromise = teachingsCollection.insertOne({
           id: newTeachingId,
           text: teachingText,
           mediaType: teachingMediaType || 'photo',
           mediaUrl,
-          createdAt: new Date().toISOString(),
+          createdAt: createdAt,
         });
         createPromises.push(teachingCreationPromise);
     }
@@ -346,3 +349,4 @@ export async function getEventById(eventId: string): Promise<Event | null> {
         return null;
     }
 }
+
