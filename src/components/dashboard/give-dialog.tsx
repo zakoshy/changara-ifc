@@ -18,7 +18,6 @@ import { useToast } from '@/hooks/use-toast';
 import { initiateStkPush } from '@/actions/mpesa';
 import { LoaderCircle, ArrowLeft } from 'lucide-react';
 import type { User } from '@/lib/types';
-import { cn } from '@/lib/utils';
 
 
 const MpesaIcon = () => (

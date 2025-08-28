@@ -3,6 +3,10 @@ import { getEvents, getTeachings } from '@/actions/events';
 import { FeedCard } from '@/components/dashboard/feed-card';
 import { User, Event, FeedItem, Teaching } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Smartphone, Phone } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { GiveDialog } from '@/components/dashboard/give-dialog';
 
 export default async function DashboardPage({ user }: { user: User }) {
   // Fetch events and teachings on the server
@@ -35,7 +39,7 @@ export default async function DashboardPage({ user }: { user: User }) {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight font-headline">
-            Welcome!
+            Welcome, {user.name.split(' ')[0]}!
           </h1>
           <p className="text-muted-foreground mt-1">
             Here's what's happening at the church.
@@ -44,6 +48,39 @@ export default async function DashboardPage({ user }: { user: User }) {
       </div>
       
       <Separator />
+
+      <section id="giving">
+        <h2 className="text-2xl font-bold tracking-tight font-headline mb-4">Support Our Ministry</h2>
+         <p className="mt-4 text-lg text-muted-foreground max-w-2xl">
+            Your generous giving enables us to continue our work in the community and spread the Gospel. Thank you for your partnership.
+        </p>
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mt-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-3"><Smartphone/> M-Pesa Paybill</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    <p className="font-semibold">Paybill Number: <span className="font-mono text-primary">247247</span></p>
+                    <p className="font-semibold">Account Number: <span className="font-mono text-primary">811335</span></p>
+                </CardContent>
+            </Card>
+              <Card>
+                <CardHeader>
+                      <CardTitle className="flex items-center gap-3"><Phone/> Lipa na M-Pesa</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    <p className="font-semibold">Send money directly to our treasurer:</p>
+                    <p className="font-semibold">Number: <span className="font-mono text-primary">0710660051</span></p>
+                </CardContent>
+            </Card>
+        </div>
+          <GiveDialog title="Give Online" user={user}>
+            <Button size="lg" className="mt-6">Give Online Securely</Button>
+          </GiveDialog>
+      </section>
+
+      <Separator />
+
 
       <div>
         <h2 className="text-2xl font-bold tracking-tight font-headline mb-4">

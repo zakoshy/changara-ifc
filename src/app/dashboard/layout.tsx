@@ -13,8 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { HandHeart, User, LogOut, Sparkles } from 'lucide-react';
-import { GiveDialog } from '@/components/dashboard/give-dialog';
+import { User, LogOut } from 'lucide-react';
 import { ProfileDialog } from '@/components/dashboard/profile-dialog';
 import { getUserById } from '@/actions/users';
 import type { User as UserType } from '@/lib/types';
@@ -125,14 +124,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <AppLogo />
             <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
                 <Link href="/dashboard" className="text-foreground font-semibold transition-colors hover:text-foreground">
-                    Events
+                    Dashboard
                 </Link>
-                <GiveDialog title="Give Tithes" user={user}>
-                    <Button variant="ghost" className="text-muted-foreground"><Sparkles className="mr-2 h-4 w-4"/>Tithes</Button>
-                </GiveDialog>
-                <GiveDialog title="Give Offering" user={user}>
-                     <Button variant="ghost" className="text-muted-foreground"><HandHeart className="mr-2 h-4 w-4"/>Offerings</Button>
-                </GiveDialog>
             </nav>
             <div className="flex w-full items-center justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4">
                 {user && <UserMenu user={user} />}
