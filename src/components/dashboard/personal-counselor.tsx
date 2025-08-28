@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -8,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Sparkles, LoaderCircle, HeartHandshake, BookOpen, ThumbsUp } from 'lucide-react';
 import { generateCounselingResponse, GenerateCounselingResponseOutput } from '@/ai/flows/personal-counselor-flow';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { Separator } from '@/components/ui/separator';
 
 export function PersonalCounselor() {
   const [problem, setProblem] = useState('');
