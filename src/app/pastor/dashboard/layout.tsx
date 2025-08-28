@@ -121,7 +121,7 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen w-full">
         <Sidebar className="border-r bg-card" collapsible="icon">
           <SidebarRail />
