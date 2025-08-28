@@ -1,0 +1,112 @@
+diff --git a/node_modules/@genkit-ai/core/lib/index.js b/node_modules/@genkit-ai/core/lib/index.js
+index b742095..746e500 100644
+--- a/node_modules/@genkit-ai/core/lib/index.js
++++ b/node_modules/@genkit-ai/core/lib/index.js
+@@ -14,7 +14,7 @@ const __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+     if (k2 === undefined) k2 = k;
+     var desc = Object.getOwnPropertyDescriptor(m, k);
+     if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+-      desc = { enumerable: true, get: function() { return m[k]; } };
++      desc = { enumerable: true, get: function() { return m[k]; }, configurable: true };
+     }
+     Object.defineProperty(o, k2, desc);
+ }) : (function(o, m, k, k2) {
+@@ -37,6 +37,13 @@ const __importStar = (this && this.__importStar) || function (mod) {
+     return result;
+ };
+ Object.defineProperty(exports, "__esModule", { value: true });
++try {
++    const genkitx = require('@genkit-ai/firebase');
++    const jaeger = require('@opentelemetry/exporter-jaeger');
++}
++catch (e) {
++    // ignore
++}
+ exports.lookupAction = exports.listActions = exports.runAction = exports.getStreamingCallback = exports.getTracer = exports.getFlow = exports.getFlowState = exports.runFlow = exports.run = exports.streamFlow = exports.renderPrompt = exports.prompt = exports.retriever = exports.embedder = exports.model = exports.action = exports.defineRetriever = exports.defineEmbedder = exports.defineModel = exports.configureGenkit = exports.genkit = exports.defineAction = exports.generate = exports.definePrompt = exports.defineFlow = exports.Tool = exports.Flow = exports.Action = exports.__hardcodedErrorText = void 0;
+ exports.z = exports.toFunction = exports.waitForOperation = exports.checkOperation = exports.fromFlow = exports.fromTool = exports.getPlugin = exports.getRegistry = exports.lookupPlugin = exports.registerPlugin = void 0;
+ const zod_1 = require("zod");
+diff --git a/node_modules/@genkit-ai/core/package.json b/node_modules/@genkit-ai/core/package.json
+index 7208d13..158a13c 100644
+--- a/node_modules/@genkit-ai/core/package.json
++++ b/node_modules/@genkit-ai/core/package.json
+@@ -62,4 +62,8 @@
+   "keywords": [
+     "genkit"
+   ]
++,
++  "peerDependenciesMeta": {
++    "@genkit-ai/firebase": { "optional": true }
++  }
+ }
+diff --git a/node_modules/@genkit-ai/core/lib/telemetry/index.js b/node_modules/@genkit-ai/core/lib/telemetry/index.js
+index b82cf0d..e37213b 100644
+--- a/node_modules/@genkit-ai/core/lib/telemetry/index.js
++++ b/node_modules/@genkit-ai/core/lib/telemetry/index.js
+@@ -34,6 +34,13 @@ const __importStar = (this && this.__importStar) || function (mod) {
+     return result;
+ };
+ Object.defineProperty(exports, "__esModule", { value: true });
++try {
++    const genkitx = require('@genkit-ai/firebase');
++    const jaeger = require('@opentelemetry/exporter-jaeger');
++}
++catch (e) {
++    // ignore
++}
+ exports.withCloudTelemetry = exports.withFileTelemetry = exports.withNoopTelemetry = exports.TelemetryConfig = exports.isLocal = exports.shutdownTelemetry = exports.recordTrace = exports.instrumentation = exports.runInNewSpan = exports.startSpan = exports.getTracer = exports.setCustomTag = exports.setTags = exports.setTag = void 0;
+ const api_1 = require("@opentelemetry/api");
+ const sdk_node_1 = require("@opentelemetry/sdk-node");
+diff --git a/node_modules/@genkit-ai/core/lib/telemetry/instrumentation.js b/node_modules/@genkit-ai/core/lib/telemetry/instrumentation.js
+index 9b71e1d..6b3b246 100644
+--- a/node_modules/@genkit-ai/core/lib/telemetry/instrumentation.js
++++ b/node_modules/@genkit-ai/core/lib/telemetry/instrumentation.js
+@@ -14,7 +14,7 @@ const __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+     if (k2 === undefined) k2 = k;
+     var desc = Object.getOwnPropertyDescriptor(m, k);
+     if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+-      desc = { enumerable: true, get: function() { return m[k]; } };
++      desc = { enumerable: true, get: function() { return m[k]; }, configurable: true };
+     }
+     Object.defineProperty(o, k2, desc);
+ }) : (function(o, m, k, k2) {
+@@ -37,6 +37,13 @@ const __importStar = (this && this.__importStar) || function (mod) {
+     return result;
+ };
+ Object.defineProperty(exports, "__esModule", { value: true });
++try {
++    const genkitx = require('@genkit-ai/firebase');
++    const jaeger = require('@opentelemetry/exporter-jaeger');
++}
++catch (e) {
++    // ignore
++}
+ exports.instrument = exports.__instrumentAndRun = exports.instrumentAndRun = void 0;
+ const async_hooks_1 = require("async_hooks");
+ const index_1 = require("./index");
+diff --git a/node_modules/@genkit-ai/core/lib/telemetry/traceStore.js b/node_modules/@genkit-ai/core/lib/telemetry/traceStore.js
+index eda4674..643503f 100644
+--- a/node_modules/@genkit-ai/core/lib/telemetry/traceStore.js
++++ b/node_modules/@genkit-ai/core/lib/telemetry/traceStore.js
+@@ -14,7 +14,7 @@ const __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+     if (k2 === undefined) k2 = k;
+     var desc = Object.getOwnPropertyDescriptor(m, k);
+     if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+-      desc = { enumerable: true, get: function() { return m[k]; } };
++      desc = { enumerable: true, get: function() { return m[k]; }, configurable: true };
+     }
+     Object.defineProperty(o, k2, desc);
+ }) : (function(o, m, k, k2) {
+@@ -37,6 +37,13 @@ const __importStar = (this && this.__importStar) || function (mod) {
+     return result;
+ };
+ Object.defineProperty(exports, "__esModule", { value: true });
++try {
++    const genkitx = require('@genkit-ai/firebase');
++    const jaeger = require('@opentelemetry/exporter-jaeger');
++}
++catch (e) {
++    // ignore
++}
+ exports.NoopTraceStore = exports.InMemoryTraceStore = exports.TraceStoreConfig = exports.isTraceStoreDefined = exports.getTraceStore = exports.defineTraceStore = void 0;
+ const __1 = require("..");
+ const index_1 = require("./index");
