@@ -20,18 +20,15 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
-  SidebarTrigger,
-  SidebarInset,
   SidebarRail
 } from '@/components/ui/sidebar';
-import { Users, User, LogOut, Calendar, BookOpen, Sparkles, Save } from 'lucide-react';
+import { Users, User, LogOut, Calendar, BookOpen, Sparkles, Save, PanelLeft } from 'lucide-react';
 import { getPastor } from '@/actions/users';
 import { useEffect, useState } from 'react';
 import type { User as UserType } from '@/lib/types';
 import { usePathname, useRouter } from 'next/navigation';
 import { ProfileDialog } from '@/components/pastor/profile-dialog';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { PanelLeft } from 'lucide-react';
 
 
 const UserMenu = ({ pastor }: { pastor: UserType }) => {
@@ -142,7 +139,7 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
             <SidebarMenu>
               {sidebarNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <Link href={item.href} passHref>
+                  <Link href={item.href} passHref legacyBehavior>
                     <SidebarMenuButton asChild tooltip={item.tooltip} isActive={pathname === item.href}>
                         <a>
                             {item.icon}
@@ -165,8 +162,8 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
             </SidebarMenu>
           </SidebarFooter>
         </Sidebar>
-        <SidebarInset>
-          <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+        <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+           <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
             <Sheet>
               <SheetTrigger asChild>
                 <Button size="icon" variant="outline" className="sm:hidden">
@@ -195,12 +192,12 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
             </div>
             {pastor && <UserMenu pastor={pastor} />}
           </header>
-          <main className="flex flex-1 flex-col p-4 sm:px-6 sm:py-6 bg-muted/40 min-h-[calc(100vh-60px)]">
+          <main className="flex flex-1 flex-col p-4 sm:px-6 sm:py-0 bg-muted/40 min-h-[calc(100vh-60px)]">
             <div className="mx-auto max-w-7xl w-full h-full flex-1">
               {children}
             </div>
           </main>
-        </SidebarInset>
+        </div>
       </div>
     </SidebarProvider>
   );
