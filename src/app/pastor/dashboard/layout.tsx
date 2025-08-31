@@ -84,6 +84,14 @@ const AppLogo = () => (
     </Link>
 );
 
+const sidebarNavItems = [
+    { href: "/pastor/dashboard", icon: <Calendar />, label: "Dashboard", tooltip: "Dashboard" },
+    { href: "/pastor/dashboard/bible", icon: <BookOpen />, label: "Bible", tooltip: "Bible" },
+    { href: "/pastor/dashboard/members", icon: <Users />, label: "Members", tooltip: "Members" },
+    { href: "/pastor/dashboard/creations", icon: <Save />, label: "Creations", tooltip: "Saved Creations" },
+    { href: "/pastor/dashboard/ai-assistant", icon: <Sparkles />, label: "AI Assistant", tooltip: "AI Assistant" },
+];
+
 export default function PastorDashboardLayout({ children }: { children: React.ReactNode }) {
   const [pastor, setPastor] = useState<UserType | null>(null);
   const pathname = usePathname();
@@ -119,16 +127,8 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
     );
   }
 
-  const sidebarNavItems = [
-    { href: "/pastor/dashboard", icon: <Calendar />, label: "Dashboard", tooltip: "Dashboard" },
-    { href: "/pastor/dashboard/bible", icon: <BookOpen />, label: "Bible", tooltip: "Bible" },
-    { href: "/pastor/dashboard/members", icon: <Users />, label: "Members", tooltip: "Members" },
-    { href: "/pastor/dashboard/creations", icon: <Save />, label: "Creations", tooltip: "Saved Creations" },
-    { href: "/pastor/dashboard/ai-assistant", icon: <Sparkles />, label: "AI Assistant", tooltip: "AI Assistant" },
-  ];
-
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen w-full">
         <Sidebar className="border-r bg-background" collapsible="icon">
           <SidebarRail />
@@ -139,7 +139,7 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
             <SidebarMenu>
               {sidebarNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <Link href={item.href} passHref legacyBehavior>
+                  <Link href={item.href} legacyBehavior passHref>
                     <SidebarMenuButton asChild tooltip={item.tooltip} isActive={pathname === item.href}>
                         <a>
                             {item.icon}
@@ -187,6 +187,17 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
                   </nav>
               </SheetContent>
             </Sheet>
+            <nav className="hidden md:flex items-center space-x-4 lg:space-x-6 mx-auto">
+              {sidebarNavItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`text-sm font-medium transition-colors ${pathname === item.href ? 'text-primary' : 'text-muted-foreground hover:text-primary'}`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
             <div className="relative ml-auto flex-1 md:grow-0">
                {/* This space can be used for a search bar if needed in the future */}
             </div>
