@@ -30,6 +30,8 @@ import { useEffect, useState } from 'react';
 import type { User as UserType } from '@/lib/types';
 import { usePathname, useRouter } from 'next/navigation';
 import { ProfileDialog } from '@/components/pastor/profile-dialog';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { PanelLeft } from 'lucide-react';
 
 
 const UserMenu = ({ pastor }: { pastor: UserType }) => {
@@ -120,46 +122,36 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
     );
   }
 
+  const sidebarNavItems = [
+    { href: "/pastor/dashboard", icon: <Calendar />, label: "Dashboard", tooltip: "Dashboard" },
+    { href: "/pastor/dashboard/bible", icon: <BookOpen />, label: "Bible", tooltip: "Bible" },
+    { href: "/pastor/dashboard/members", icon: <Users />, label: "Members", tooltip: "Members" },
+    { href: "/pastor/dashboard/creations", icon: <Save />, label: "Creations", tooltip: "Saved Creations" },
+    { href: "/pastor/dashboard/ai-assistant", icon: <Sparkles />, label: "AI Assistant", tooltip: "AI Assistant" },
+  ];
+
   return (
     <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen w-full">
-        <Sidebar className="border-r bg-card" collapsible="icon">
+        <Sidebar className="border-r bg-background" collapsible="icon">
           <SidebarRail />
           <SidebarHeader>
               <AppLogo />
           </SidebarHeader>
           <SidebarContent className="p-2">
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/pastor/dashboard" tooltip="Dashboard" isActive={pathname === '/pastor/dashboard'}>
-                  <Calendar />
-                  <span>Dashboard</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/pastor/dashboard/bible" tooltip="Bible" isActive={pathname === '/pastor/dashboard/bible'}>
-                  <BookOpen />
-                  <span>Bible</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-               <SidebarMenuItem>
-                <SidebarMenuButton href="/pastor/dashboard/members" tooltip="Members" isActive={pathname === '/pastor/dashboard/members'}>
-                  <Users />
-                  <span>Members</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-               <SidebarMenuItem>
-                <SidebarMenuButton href="/pastor/dashboard/creations" tooltip="Saved Creations" isActive={pathname === '/pastor/dashboard/creations'}>
-                  <Save />
-                  <span>Creations</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/pastor/dashboard/ai-assistant" tooltip="AI Assistant" isActive={pathname === '/pastor/dashboard/ai-assistant'}>
-                    <Sparkles />
-                    <span>AI Assistant</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {sidebarNavItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <Link href={item.href} passHref>
+                    <SidebarMenuButton asChild tooltip={item.tooltip} isActive={pathname === item.href}>
+                      <a>
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarContent>
            <SidebarFooter className="p-2">
@@ -174,25 +166,30 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>
-          <header className="sticky top-0 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-            <SidebarTrigger className="sm:hidden" />
-            <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-              <Link href="/pastor/dashboard" className={`font-bold ${pathname === '/pastor/dashboard' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                Dashboard
-              </Link>
-              <Link href="/pastor/dashboard/bible" className={`font-bold ${pathname === '/pastor/dashboard/bible' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                Bible
-              </Link>
-              <Link href="/pastor/dashboard/members" className={`font-bold ${pathname === '/pastor/dashboard/members' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                Members
-              </Link>
-              <Link href="/pastor/dashboard/creations" className={`font-bold ${pathname === '/pastor/dashboard/creations' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                Creations
-              </Link>
-               <Link href="/pastor/dashboard/ai-assistant" className={`font-bold ${pathname === '/pastor/dashboard/ai-assistant' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                AI Assistant
-              </Link>
-            </nav>
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button size="icon" variant="outline" className="sm:hidden">
+                  <PanelLeft className="h-5 w-5" />
+                  <span className="sr-only">Toggle Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="sm:max-w-xs">
+                 <nav className="grid gap-6 text-lg font-medium">
+                    <AppLogo/>
+                    {sidebarNavItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`flex items-center gap-4 px-2.5 ${pathname === item.href ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                      >
+                          {item.icon}
+                          {item.label}
+                      </Link>
+                    ))}
+                  </nav>
+              </SheetContent>
+            </Sheet>
             <div className="relative ml-auto flex-1 md:grow-0">
                {/* This space can be used for a search bar if needed in the future */}
             </div>
