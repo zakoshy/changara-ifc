@@ -131,7 +131,7 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
   ];
 
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen w-full">
         <Sidebar className="border-r bg-background" collapsible="icon">
           <SidebarRail />
@@ -144,10 +144,10 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
                 <SidebarMenuItem key={item.href}>
                   <Link href={item.href} passHref>
                     <SidebarMenuButton asChild tooltip={item.tooltip} isActive={pathname === item.href}>
-                      <a>
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </a>
+                        <a>
+                            {item.icon}
+                            <span>{item.label}</span>
+                        </a>
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
