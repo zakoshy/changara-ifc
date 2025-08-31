@@ -193,7 +193,7 @@ export default function PastorDashboardLayout({ children }: { children: React.Re
             <div className="relative ml-auto flex-1 md:grow-0">
                {/* This space can be used for a search bar if needed in the future */}
             </div>
-            <UserMenu pastor={pastor} />
+            {pastor && <UserMenu pastor={pastor} />}
           </header>
           <main className="flex flex-1 flex-col p-4 sm:px-6 sm:py-6 bg-muted/40 min-h-[calc(100vh-60px)]">
             <div className="mx-auto max-w-7xl w-full h-full flex-1">
