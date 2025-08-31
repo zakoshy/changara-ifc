@@ -66,9 +66,6 @@ export default function LandingPage() {
                 <Button size="lg" asChild>
                   <Link href="/signup">Join Our Community</Link>
                 </Button>
-                <Button size="lg" variant="outline" className="bg-transparent text-white hover:bg-white hover:text-primary" asChild>
-                  <Link href="/pastor/login">Pastor's Area <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                </Button>
               </div>
             </div>
           </div>
